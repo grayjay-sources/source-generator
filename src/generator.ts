@@ -116,7 +116,6 @@ export class SourceGenerator {
           });
           console.log('✅ Required dependencies installed (optional skipped)\n');
           console.log('⚠️  Note: Some features may be limited:');
-          console.log('   • bonjour - mDNS device discovery (network scan will be used instead)');
           console.log('   • qrcode - QR code generation (manual installation link available)\n');
         } catch (noOptionalError) {
           console.error('❌ Failed to install dependencies even without optionals');
@@ -223,8 +222,7 @@ export class SourceGenerator {
         'typescript': '5.4.5'
       },
       optionalDependencies: {
-        'qrcode': '^1.5.3',   // For QR code generation in utils
-        'bonjour': '^3.5.0'   // For fast mDNS device discovery (pure JS, no compilation)
+        'qrcode': '^1.5.3'   // For QR code generation in utils (dev-portal-client handles discovery)
       }
     };
 
