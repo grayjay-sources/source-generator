@@ -76,11 +76,14 @@ export class SourceGenerator {
     // Generate utils file
     await this.generateUtilsFile();
 
-    // Generate plugin types
-    await this.generatePluginTypes();
+    // Generate types file
+    await this.generateTypesFile();
     
     // Generate scripts directory
     await this.generateScripts();
+    
+    // Generate test directory
+    await this.generateTests();
     
     // Generate GitHub workflows
     await this.generateWorkflows();
@@ -190,7 +193,8 @@ export class SourceGenerator {
         sign: 'node scripts/sign.js',
         'build:sign': 'npm run build && npm run sign',
         dev: 'rollup -c -w',
-        test: 'node scripts/test.js',
+        test: 'npm run build && node --test',
+        'test:integration': 'node scripts/integration.js',
         prettier: 'npx prettier --write ./src/**/*.ts',
         publish: 'npm run build:sign && node scripts/publish.js',
         submit: 'node scripts/submit.js',
@@ -210,6 +214,8 @@ export class SourceGenerator {
       },
       devDependencies: {
         '@grayjay-sources/dev-portal-client': '^1.3.1',
+        '@kaidelorenzo/grayjay-polyfill': 'gitlab:kaidelorenzo/grayjay-polyfill#ed272f793e402d6fbdc95859cf777c188379b56f',
+        '@types/grayjay-source': 'gitlab:kaidelorenzo/grayjay-plugin-types#9dcec6910917e3ddc5a663f20be84bd97dc1fe9a',
         '@rollup/plugin-commonjs': '25.0.8',
         '@rollup/plugin-node-resolve': '15.2.3',
         '@rollup/plugin-terser': '0.4.4',
@@ -396,15 +402,17 @@ export class SourceGenerator {
     );
   }
 
-  private async generatePluginTypes(): Promise<void> {
-    const typesDir = path.join(this.options.outputDir, 'types');
-    await fs.mkdir(typesDir, { recursive: true });
-
-    const pluginTypes = await this.getRawTemplate('plugin.d.ts');
-
+  private async generateTypesFile(): Promise<void> {
+    const srcDir = path.join(this.options.outputDir, 'src');
+    const { config } = this.options;
+    
+    const types = await this.getFormattedTemplate('snippets/types-template.ts', {
+      PLATFORM_NAME: config.name
+    });
+    
     await fs.writeFile(
-      path.join(typesDir, 'plugin.d.ts'),
-      pluginTypes
+      path.join(srcDir, 'types.ts'),
+      types
     );
   }
 
@@ -447,11 +455,30 @@ export class SourceGenerator {
       initScript
     );
 
-    // Generate test script
-    const testScript = await this.getRawTemplate('scripts/test.js');
+    // Generate integration test script (dev portal)
+    const integrationScript = await this.getRawTemplate('scripts/integration.js');
     await fs.writeFile(
-      path.join(scriptsDir, 'test.js'),
-      testScript
+      path.join(scriptsDir, 'integration.js'),
+      integrationScript
+    );
+  }
+
+  private async generateTests(): Promise<void> {
+    const testDir = path.join(this.options.outputDir, 'test');
+    await fs.mkdir(testDir, { recursive: true });
+
+    const { config } = this.options;
+    const platformUrl = new URL(config.platformUrl).hostname;
+
+    // Generate test file with proper substitutions
+    const testTemplate = await this.getFormattedTemplate('test/script.test.ts', {
+      PLATFORM_NAME: config.name,
+      PLATFORM_URL: platformUrl
+    });
+    
+    await fs.writeFile(
+      path.join(testDir, 'script.test.ts'),
+      testTemplate
     );
   }
 
