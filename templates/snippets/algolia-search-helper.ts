@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 // Helper for Algolia-powered search (used by platforms like Joyn, Twitch, etc.)
 

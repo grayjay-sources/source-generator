@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 import { getBaseUrl } from '../constants';
 
 function apiRequest(endpoint: string, method: string = 'GET', body: any = null): any {

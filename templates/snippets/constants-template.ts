@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 // Constants for {{PLATFORM_NAME}}
 // NOTE: BASE_URL, PLATFORM_URL, and PLATFORM are available at runtime via config.constants

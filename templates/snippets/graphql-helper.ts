@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 function graphqlRequest(query: string, variables: any = {}): any {
   const response = http.POST(BASE_URL + '/graphql', JSON.stringify({

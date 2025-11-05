@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 class CommentsPager extends CommentPager {
   private videoUrl: string;

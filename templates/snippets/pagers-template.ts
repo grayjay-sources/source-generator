@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 // Pager classes handle pagination for different content types
 

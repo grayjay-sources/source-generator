@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 import { PLATFORM, BASE_URL } from './constants';
 

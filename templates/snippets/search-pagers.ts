@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 class SearchPager extends VideoPager {
   private query: string;

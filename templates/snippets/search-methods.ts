@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 source.searchSuggestions = function (query: string): string[] {
   log('searchSuggestions called with query: ' + query);

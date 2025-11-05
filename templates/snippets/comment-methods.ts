@@ -1,4 +1,4 @@
-/// <reference path="../../types/plugin.d.ts" />
+
 
 source.getComments = function (url: string): CommentPager {
   log('getComments called with url: ' + url);
