@@ -315,7 +315,14 @@ export class SourceGenerator {
     const scriptsDir = path.join(this.options.outputDir, 'scripts');
     await fs.mkdir(scriptsDir, { recursive: true });
 
-    // Only generate publish script (QR is generated once during project creation)
+    // Generate sign script
+    const signScript = await this.getRawTemplate('scripts/sign.js');
+    await fs.writeFile(
+      path.join(scriptsDir, 'sign.js'),
+      signScript
+    );
+
+    // Generate publish script
     const publishScript = await this.getRawTemplate('scripts/publish.js');
     await fs.writeFile(
       path.join(scriptsDir, 'publish.js'),
