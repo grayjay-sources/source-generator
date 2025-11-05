@@ -4,8 +4,8 @@
   "description": "CLI tool to generate GrayJay source plugin skeleton projects",
   "main": "dist/index.js",
   "bin": {
-    "grayjay-generate": "./dist/cli.js",
-    "gjsg": "./dist/cli.js"
+    "grayjay-generate": "dist/cli.js",
+    "gjsg": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -26,8 +26,18 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/grayjay-sources/source-generator.git"
+    "url": "git+https://github.com/grayjay-sources/source-generator.git"
   },
+  "bugs": {
+    "url": "https://github.com/grayjay-sources/source-generator/issues"
+  },
+  "homepage": "https://github.com/grayjay-sources/source-generator#readme",
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=14",
     "npm": ">=6.14.4"
