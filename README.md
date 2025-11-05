@@ -157,15 +157,15 @@ npm run sign
 
 ## Available Scripts
 
-| Command              | Description                        |
-| -------------------- | ---------------------------------- |
-| `npm run build`      | Build plugin                       |
-| `npm run dev`        | Watch mode                         |
-| `npm run test`       | Auto-test via dev portal           |
-| `npm run sign`       | Sign plugin                        |
-| `npm run build:sign` | Build and sign                     |
-| `npm run publish`    | Build, sign, and publish to GitHub |
-| `npm run submit`     | Build, sign, and submit to GrayJay |
+| Command              | Description                         |
+| -------------------- | ----------------------------------- |
+| `npm run build`      | Build plugin                        |
+| `npm run dev`        | Watch mode                          |
+| `npm run test`       | Auto-test via dev portal            |
+| `npm run sign`       | Sign plugin                         |
+| `npm run build:sign` | Build and sign                      |
+| `npm run publish`    | Build, sign, and publish to GitHub  |
+| `npm run submit`     | Submit to grayjay-sources.github.io |
 
 ## Plugin Capabilities
 
