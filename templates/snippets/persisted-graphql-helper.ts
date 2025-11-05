@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 // Helper for GraphQL APIs that use persisted queries (like Joyn, GitHub, etc.)
 // Persisted queries use SHA256 hashes instead of sending full query strings
 

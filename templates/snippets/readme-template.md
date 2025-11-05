@@ -58,6 +58,34 @@ npm run build
 
 This will generate the minified plugin files in the `dist/` directory.
 
+### Testing with Dev Server
+
+The fastest way to test your plugin during development:
+
+```bash
+npm run test
+```
+
+This will:
+
+- 🔍 **Scan** your local network for GrayJay dev servers (port 11337)
+- 🌐 **Start** a local HTTP server to serve your plugin files
+- 📤 **Inject** your plugin into the dev server automatically
+- 🚀 **Open** the dev portal in your default browser
+
+**Requirements:**
+
+- GrayJay app running on a device with dev mode enabled
+- Device on the same local network
+- Plugin must be built first (`npm run build`)
+
+**Development Workflow:**
+
+1. Make changes to code in `src/`
+2. Run `npm run build`
+3. Click "Reload" button in dev portal
+4. Test your changes immediately!
+
 ### Build and Publish
 
 ```bash

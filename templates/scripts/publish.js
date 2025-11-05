@@ -19,80 +19,12 @@
  *   npm run publish 2      # Sets version to 2
  */
 
-const { execSync } = require('child_process');
+const utils = require('./utils');
+const { log, colors, execCommandInherit, readJsonFile, writeJsonFile, getCurrentVersion, getGitHubInfo, generateQRCode } = utils;
 const fs = require('fs');
 const path = require('path');
 
 const CONFIG_PATH = path.join(__dirname, '..', 'dist', 'config.json');
-const QR_CODE_PATH = path.join(__dirname, '..', 'assets', 'qrcode.png');
-
-// Colors for console output
-const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  cyan: '\x1b[36m',
-};
-
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
-}
-
-function getCurrentVersion() {
-  try {
-    if (!fs.existsSync(CONFIG_PATH)) {
-      log('⚠️  config.json not found. Building first...', colors.yellow);
-      execSync('npm run build', { stdio: 'inherit' });
-    }
-    
-    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-    return config.version || 1;
-  } catch (error) {
-    log('⚠️  Could not read current version from config.json', colors.yellow);
-    return 1;
-  }
-}
-
-function getGitHubInfo() {
-  try {
-    const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
-    const repoUrl = packageJson.repository?.url || execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
-    
-    // Parse GitHub owner and repo from URL
-    const match = repoUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)/);
-    
-    if (!match) {
-      throw new Error('Could not parse GitHub repository from git remote');
-    }
-    
-    return {
-      owner: match[1],
-      repo: match[2].replace(/\.git$/, '')
-    };
-  } catch (error) {
-    throw new Error(`Failed to get GitHub info: ${error.message}`);
-  }
-}
-
-function generateQRCode(url) {
-  log('\n📱 Generating QR code...', colors.cyan);
-  
-  try {
-    const QRCode = require('qrcode');
-    QRCode.toFile(QR_CODE_PATH, url, {
-      width: 512,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
-    log(`✅ QR code generated: ${QR_CODE_PATH}`, colors.green);
-  } catch (error) {
-    log(`⚠️  Failed to generate QR code: ${error.message}`, colors.yellow);
-  }
-}
 
 async function publish() {
   log('\n🚀 GrayJay Plugin Publisher\n', colors.cyan);
@@ -121,27 +53,27 @@ async function publish() {
   
   // Step 3: Build the plugin
   log('\n🔨 Building plugin...', colors.yellow);
-  execSync('npm run build', { stdio: 'inherit' });
+  execCommandInherit('npm run build');
   
   // Step 4: Update version in config.json
   log('\n📝 Updating version in config.json...', colors.cyan);
-  const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  const config = readJsonFile(CONFIG_PATH);
   const oldVersion = config.version || 1;
   config.version = newVersion;
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
+  writeJsonFile(CONFIG_PATH, config);
   log(`📦 Version bumped: ${oldVersion} → ${newVersion}`, colors.cyan);
   
   // Step 5: Sign the plugin
   log('\n🔐 Signing plugin...', colors.yellow);
   try {
-    execSync('npm run sign', { stdio: 'inherit' });
+    execCommandInherit('npm run sign');
   } catch (error) {
     log('❌ Signing failed. Make sure OpenSSL is installed.', colors.red);
     process.exit(1);
   }
   
   // Reload config after signing to get signature
-  const signedConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  const signedConfig = readJsonFile(CONFIG_PATH);
   
   // Step 6: Generate QR code
   const installUrl = `grayjay://plugin/${signedConfig.sourceUrl}`;
@@ -149,18 +81,18 @@ async function publish() {
   
   // Step 7: Commit changes
   log('\n📝 Committing changes...', colors.cyan);
-  execSync('git add dist/ assets/qrcode.png', { stdio: 'inherit' });
-  execSync(`git commit -m "chore: Release v${newVersion}" -m "- Updated version to ${newVersion}" -m "- Signed plugin" -m "- Generated QR code"`, { stdio: 'inherit' });
+  execCommandInherit('git add dist/ assets/qrcode.png');
+  execCommandInherit(`git commit -m "chore: Release v${newVersion}" -m "- Updated version to ${newVersion}" -m "- Signed plugin" -m "- Generated QR code"`);
   log('✅ Changes committed', colors.green);
   
   // Step 8: Create git tag
   log(`\n🏷️  Creating git tag v${newVersion}...`, colors.cyan);
-  execSync(`git tag -a v${newVersion} -m "Release v${newVersion}"`, { stdio: 'inherit' });
+  execCommandInherit(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
   log(`✅ Tag created: v${newVersion}`, colors.green);
   
   // Step 9: Push to GitHub
   log('\n📤 Pushing to GitHub...', colors.yellow);
-  execSync('git push && git push --tags', { stdio: 'inherit' });
+  execCommandInherit('git push && git push --tags');
   log('✅ Pushed successfully!', colors.green);
   
   log(`\n✅ Publication complete!\n`, colors.green);
@@ -177,4 +109,3 @@ publish().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-

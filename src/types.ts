@@ -10,8 +10,8 @@ export interface SourceConfig {
   // Technology flags
   usesApi?: boolean;
   usesGraphql?: boolean;
-  usesHtml?: boolean;
-  usesWebscraping?: boolean;
+  usesHtml?: boolean; // Includes web scraping (both use DOMParser)
+  usesAlgolia?: boolean;
   // Feature flags (all optional, only enabled if explicitly requested)
   hasAuth?: boolean;
   hasLiveStreams?: boolean;
@@ -19,6 +19,19 @@ export interface SourceConfig {
   hasPlaylists?: boolean;
   hasSearch?: boolean;
   version?: number;
+  // grayjay-sources.github.io specific options (prefixed with _)
+  _tags?: string[];
+  _nsfw?: boolean;
+  _generatorUrl?: string;
+  _feeds?: {
+    commits?: string;
+    releases?: string;
+  };
+  _customButtons?: Array<{
+    text: string;
+    url: string;
+    classes?: string;
+  }>;
 }
 
 export interface GeneratorOptions {
@@ -31,8 +44,8 @@ export interface GeneratorOptions {
 export interface PluginCapabilities {
   useGraphQL: boolean;
   useAPI: boolean;
-  useHTML: boolean;
-  useWebScraping: boolean;
+  useHTML: boolean; // Covers both HTML parsing and web scraping
+  useAlgolia: boolean;
   hasAuth: boolean;
   hasLiveStreams: boolean;
   hasComments: boolean;

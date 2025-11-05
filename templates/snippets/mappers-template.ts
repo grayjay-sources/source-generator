@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 import { PLATFORM, BASE_URL } from './constants';
 
 // Mapper functions convert platform-specific data structures to GrayJay types

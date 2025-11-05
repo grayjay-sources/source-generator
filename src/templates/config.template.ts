@@ -21,7 +21,7 @@ function getRepoName(repoUrl: string): string {
 export function generateConfigJson(config: SourceConfig): string {
   const packageNames: string[] = ['Http'];
   
-  if (config.usesHtml || config.usesWebscraping) {
+  if (config.usesHtml) {
     packageNames.push('DOMParser');
   }
 
@@ -68,7 +68,18 @@ export function generateConfigJson(config: SourceConfig): string {
     ],
     changelog: {
       '1': ['Initial release']
-    }
+    },
+    // Runtime constants (configurable without rebuilding)
+    // Note: platformUrl is already in root config and accessible via config.platformUrl
+    constants: {
+      baseUrl: config.baseUrl
+    },
+    // grayjay-sources.github.io specific options (prefixed with _)
+    ...(config._tags && config._tags.length > 0 && { _tags: config._tags }),
+    ...(config._nsfw && { _nsfw: config._nsfw }),
+    ...(config._generatorUrl && { _generatorUrl: config._generatorUrl }),
+    ...(config._feeds && { _feeds: config._feeds }),
+    ...(config._customButtons && config._customButtons.length > 0 && { _customButtons: config._customButtons }),
   };
 
   return JSON.stringify(configObj, null, 2);

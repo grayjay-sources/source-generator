@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 // Pager classes handle pagination for different content types
 
 export class {{PLATFORM_PASCAL}}VideoPager extends VideoPager {

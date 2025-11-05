@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 function fetchHtml(url: string): string {
   const response = http.GET(url, {}, false);
   if (!response.isOk) {

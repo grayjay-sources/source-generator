@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 import { GeneratorOptions, PluginCapabilities } from './types';
 import { generateConfigJson } from './templates/config.template';
 import { generateQRCode, ensureAssetsDirectory, resolveLogoUrl } from './assets';
@@ -14,7 +15,7 @@ export class SourceGenerator {
 
   private getCapabilities(): PluginCapabilities {
     const { 
-      usesApi, usesGraphql, usesHtml, usesWebscraping,
+      usesApi, usesGraphql, usesHtml, usesAlgolia,
       hasAuth, hasLiveStreams, hasComments, hasPlaylists, hasSearch 
     } = this.options.config;
     
@@ -22,7 +23,7 @@ export class SourceGenerator {
       useGraphQL: usesGraphql || false,
       useAPI: usesApi || false,
       useHTML: usesHtml || false,
-      useWebScraping: usesWebscraping || false,
+      useAlgolia: usesAlgolia || false,
       hasAuth: hasAuth || false,
       hasLiveStreams: hasLiveStreams || false,
       hasComments: hasComments || false,
@@ -83,6 +84,97 @@ export class SourceGenerator {
     
     // Generate GitHub workflows
     await this.generateWorkflows();
+
+    // Verify the generated source by building it
+    await this.verifyGeneratedSource();
+  }
+
+  private async verifyGeneratedSource(): Promise<void> {
+    const { outputDir } = this.options;
+    
+    console.log('\n🔧 Verifying generated source...\n');
+    
+    try {
+      // Step 1: Install dependencies (try with optionals first)
+      console.log('📦 Installing dependencies...');
+      
+      try {
+        execSync('npm install', { 
+          cwd: outputDir, 
+          stdio: 'inherit',
+          encoding: 'utf-8'
+        });
+        console.log('✅ All dependencies installed (including optional)\n');
+      } catch (installError) {
+        console.log('⚠️  Optional dependencies failed, retrying without them...\n');
+        
+        try {
+          execSync('npm install --no-optional', { 
+            cwd: outputDir, 
+            stdio: 'inherit',
+            encoding: 'utf-8'
+          });
+          console.log('✅ Required dependencies installed (optional skipped)\n');
+          console.log('⚠️  Note: Some features may be limited:');
+          console.log('   • bonjour - mDNS device discovery (network scan will be used instead)');
+          console.log('   • qrcode - QR code generation (manual installation link available)\n');
+        } catch (noOptionalError) {
+          console.error('❌ Failed to install dependencies even without optionals');
+          throw noOptionalError;
+        }
+      }
+      
+      // Step 2: Build the project
+      console.log('🔨 Building plugin...');
+      execSync('npm run build', { 
+        cwd: outputDir, 
+        stdio: 'inherit',
+        encoding: 'utf-8'
+      });
+      console.log('✅ Build successful\n');
+      
+      // Step 3: Try to sign (optional, will skip if OpenSSL not available)
+      console.log('🔐 Attempting to sign plugin...');
+      try {
+        execSync('npm run sign', { 
+          cwd: outputDir, 
+          stdio: 'inherit',
+          encoding: 'utf-8'
+        });
+        console.log('✅ Plugin signed successfully\n');
+      } catch (signError) {
+        console.log('⚠️  Signing skipped (OpenSSL may not be installed)\n');
+      }
+      
+      // Step 4: Verify dist/config.json exists
+      const configPath = path.join(outputDir, 'dist', 'config.json');
+      try {
+        await fs.access(configPath);
+        console.log('✅ Configuration file generated\n');
+        
+        // Read and display the config
+        const configContent = await fs.readFile(configPath, 'utf-8');
+        const config = JSON.parse(configContent);
+        console.log(`📋 Plugin Details:`);
+        console.log(`   Name: ${config.name}`);
+        console.log(`   ID: ${config.id}`);
+        console.log(`   Version: ${config.version}`);
+        console.log(`   Author: ${config.author}`);
+        if (config.scriptSignature) {
+          console.log(`   🔐 Signature: Present`);
+        }
+        console.log('');
+      } catch {
+        console.warn('⚠️  Could not verify dist/config.json');
+      }
+      
+      console.log('✅ Source verification complete!\n');
+      
+    } catch (error) {
+      console.error('\n❌ Verification failed:', error instanceof Error ? error.message : error);
+      console.error('   The generated source may have issues. Please check the output above.\n');
+      throw error;
+    }
   }
 
   private async generatePackageJson(): Promise<void> {
@@ -100,8 +192,12 @@ export class SourceGenerator {
         'build:sign': 'npm run build && npm run sign',
         'build:publish': 'npm run build:sign && npm run publish',
         dev: 'rollup -c -w',
+        test: 'node scripts/test.js',
         prettier: 'npx prettier --write ./src/**/*.ts',
-        publish: 'node scripts/publish.js'
+        publish: 'node scripts/publish.js',
+        submit: 'node scripts/submit.js',
+        init: 'node scripts/init.js',
+        postinstall: 'node scripts/init.js'
       },
       engines: {
         node: '>=14',
@@ -115,6 +211,7 @@ export class SourceGenerator {
         url: config.repositoryUrl
       },
       devDependencies: {
+        '@grayjay-sources/dev-portal-client': '^1.3.1',
         '@rollup/plugin-commonjs': '25.0.8',
         '@rollup/plugin-node-resolve': '15.2.3',
         '@rollup/plugin-terser': '0.4.4',
@@ -124,6 +221,10 @@ export class SourceGenerator {
         'rollup-plugin-delete': '2.0.0',
         'tslib': '2.6.2',
         'typescript': '5.4.5'
+      },
+      optionalDependencies: {
+        'qrcode': '^1.5.3',   // For QR code generation in utils
+        'bonjour': '^3.5.0'   // For fast mDNS device discovery (pure JS, no compilation)
       }
     };
 
@@ -205,8 +306,7 @@ export class SourceGenerator {
     const techStack: string[] = [];
     if (config.usesApi) techStack.push('- REST API');
     if (config.usesGraphql) techStack.push('- GRAPHQL');
-    if (config.usesHtml) techStack.push('- HTML');
-    if (config.usesWebscraping) techStack.push('- WEB SCRAPING');
+    if (config.usesHtml) techStack.push('- HTML Parsing / Web Scraping');
     
     const readme = await this.getFormattedTemplate('snippets/readme-template.md', {
       PLATFORM_NAME: config.name,
@@ -328,6 +428,34 @@ export class SourceGenerator {
       path.join(scriptsDir, 'publish.js'),
       publishScript
     );
+
+    // Generate submit script
+    const submitScript = await this.getRawTemplate('scripts/submit.js');
+    await fs.writeFile(
+      path.join(scriptsDir, 'submit.js'),
+      submitScript
+    );
+
+    // Generate utils script
+    const utilsScript = await this.getRawTemplate('scripts/utils.js');
+    await fs.writeFile(
+      path.join(scriptsDir, 'utils.js'),
+      utilsScript
+    );
+
+    // Generate init script
+    const initScript = await this.getRawTemplate('scripts/init.js');
+    await fs.writeFile(
+      path.join(scriptsDir, 'init.js'),
+      initScript
+    );
+
+    // Generate test script
+    const testScript = await this.getRawTemplate('scripts/test.js');
+    await fs.writeFile(
+      path.join(scriptsDir, 'test.js'),
+      testScript
+    );
   }
 
   private async generateWorkflows(): Promise<void> {
@@ -335,7 +463,7 @@ export class SourceGenerator {
     await fs.mkdir(workflowsDir, { recursive: true });
 
     // Generate release workflow
-    const releaseWorkflow = await this.getRawTemplate('.github/workflows/release.yml');
+    const releaseWorkflow = await this.getRawTemplate('workflows/release.yml');
     await fs.writeFile(
       path.join(workflowsDir, 'release.yml'),
       releaseWorkflow
@@ -445,6 +573,15 @@ export class SourceGenerator {
       
       const helperContent = await this.getSnippet('html-helper', commonReplacements);
       await fs.writeFile(path.join(htmlDir, 'parser.ts'), helperContent);
+    }
+
+    // Generate Algolia search module
+    if (capabilities.useAlgolia) {
+      const algoliaDir = path.join(srcDir, 'search');
+      await fs.mkdir(algoliaDir, { recursive: true });
+      
+      const algoliaContent = await this.getSnippet('algolia-search-helper', commonReplacements);
+      await fs.writeFile(path.join(algoliaDir, 'algolia.ts'), algoliaContent);
     }
 
     // Generate mappers module

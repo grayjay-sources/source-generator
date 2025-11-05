@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 // Utility functions for {{PLATFORM_NAME}}
 
 /**

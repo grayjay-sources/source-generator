@@ -1,6 +1,10 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 // Helper for Algolia-powered search (used by platforms like Joyn, Twitch, etc.)
 
-import { ALGOLIA_APP_ID, BASE_URL_ALGOLIA } from './constants';
+// TODO: Add these to your constants.ts file:
+// export const ALGOLIA_APP_ID = 'YOUR_APP_ID';
+// export const BASE_URL_ALGOLIA = 'https://YOUR_APP_ID-dsn.algolia.net/1/indexes/*/queries';
 
 /**
  * Get Algolia API key from platform's API

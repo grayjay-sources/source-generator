@@ -10,6 +10,17 @@
  * 4. Updates dist/config.json with scriptSignature and scriptPublicKey
  */
 
+const utils = require("./utils");
+const {
+  log,
+  colors,
+  execCommand,
+  execCommandInherit,
+  readJsonFile,
+  writeJsonFile,
+  ensureDir,
+  checkOpenSSL,
+} = utils;
 const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
@@ -19,25 +30,9 @@ const PRIVATE_KEY_PATH = path.join(SECRETS_DIR, "signing_key.pem");
 const SCRIPT_PATH = path.join(__dirname, "..", "dist", "script.js");
 const CONFIG_PATH = path.join(__dirname, "..", "dist", "config.json");
 
-// Colors for console output
-const colors = {
-  reset: "\x1b[0m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  red: "\x1b[31m",
-  cyan: "\x1b[36m",
-};
-
-function log(message, color = colors.reset) {
-  console.log(`${color}${message}${colors.reset}`);
-}
-
 function ensurePrivateKey() {
   // Create .secrets directory if it doesn't exist
-  if (!fs.existsSync(SECRETS_DIR)) {
-    log("📁 Creating .secrets directory...", colors.cyan);
-    fs.mkdirSync(SECRETS_DIR, { recursive: true });
-  }
+  ensureDir(SECRETS_DIR);
 
   // Generate private key if it doesn't exist
   if (!fs.existsSync(PRIVATE_KEY_PATH)) {
@@ -97,14 +92,17 @@ function extractPublicKey() {
     // Extract public key in two steps for better Windows compatibility
     const publicKeyPem = execSync(
       `openssl rsa -pubout -outform PEM -in "${PRIVATE_KEY_PATH}"`,
-      { encoding: "utf8", stdio: ['pipe', 'pipe', 'ignore'] }
+      { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }
     );
-    
+
     // Remove BEGIN/END lines and newlines
     const publicKey = publicKeyPem
-      .split('\n')
-      .filter(line => !line.includes('BEGIN') && !line.includes('END') && line.trim())
-      .join('')
+      .split("\n")
+      .filter(
+        (line) =>
+          !line.includes("BEGIN") && !line.includes("END") && line.trim()
+      )
+      .join("")
       .trim();
 
     log("✅ Public key extracted", colors.green);
@@ -125,15 +123,11 @@ function updateConfig(signature, publicKey) {
   log("\n📄 Updating config.json...", colors.cyan);
 
   try {
-    const config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
+    const config = readJsonFile(CONFIG_PATH);
     config.scriptSignature = signature;
     config.scriptPublicKey = publicKey;
 
-    fs.writeFileSync(
-      CONFIG_PATH,
-      JSON.stringify(config, null, 2) + "\n",
-      "utf8"
-    );
+    writeJsonFile(CONFIG_PATH, config);
     log("✅ config.json updated with signature and public key", colors.green);
   } catch (error) {
     log("❌ Failed to update config.json", colors.red);
@@ -143,6 +137,31 @@ function updateConfig(signature, publicKey) {
 
 function main() {
   log("\n🔐 GrayJay Plugin Signing Tool\n", colors.cyan);
+
+  // Check for OpenSSL (included with Git for Windows)
+  if (!checkOpenSSL()) {
+    log(
+      "\n💡 Quick fix for PowerShell users:",
+      colors.cyan
+    );
+    log(
+      "   Run these commands in your PowerShell session:",
+      colors.cyan
+    );
+    log(
+      "   Import-Module $env:ChocolateyInstall\\helpers\\chocolateyProfile.psm1",
+      colors.yellow
+    );
+    log(
+      "   refreshenv",
+      colors.yellow
+    );
+    log(
+      "   npm run sign  # Try again",
+      colors.green
+    );
+    process.exit(1);
+  }
 
   try {
     // Ensure private key exists and is valid

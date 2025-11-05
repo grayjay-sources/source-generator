@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 source.isLoggedIn = function (): boolean {
   return state.authenticated;
 };

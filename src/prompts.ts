@@ -78,8 +78,8 @@ export async function promptForConfig(): Promise<SourceConfig> {
       choices: [
         { name: 'REST API', value: 'api', checked: true },
         { name: 'GraphQL', value: 'graphql' },
-        { name: 'HTML Parsing', value: 'html' },
-        { name: 'Web Scraping', value: 'webscraping' }
+        { name: 'HTML Parsing/Web Scraping (DOMParser)', value: 'html' },
+        { name: 'Algolia Search', value: 'algolia' }
       ],
       validate: (input) => input.length > 0 || 'Please select at least one technology'
     },
@@ -118,8 +118,51 @@ export async function promptForConfig(): Promise<SourceConfig> {
       name: 'logoUrl',
       message: 'Logo URL (optional, will fetch favicon from platform URL if not provided):',
       default: ''
+    },
+    {
+      type: 'confirm',
+      name: 'specifyRepoOptions',
+      message: 'Do you want to specify config options used by grayjay-sources.github.io?',
+      default: false
     }
   ]);
+
+  // Conditionally ask for repo-specific options
+  let repoOptions: any = {};
+  if (answers.specifyRepoOptions) {
+    repoOptions = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'tags',
+        message: 'Tags (comma-separated, e.g., "video,music,live"):',
+        default: ''
+      },
+      {
+        type: 'confirm',
+        name: 'nsfw',
+        message: 'Is this source NSFW content?',
+        default: false
+      },
+      {
+        type: 'input',
+        name: 'generatorUrl',
+        message: 'Generator URL (optional, URL to web-based generator):',
+        default: ''
+      },
+      {
+        type: 'input',
+        name: 'feedsCommits',
+        message: 'Commits feed URL (optional):',
+        default: ''
+      },
+      {
+        type: 'input',
+        name: 'feedsReleases',
+        message: 'Releases feed URL (optional):',
+        default: ''
+      }
+    ]);
+  }
 
   return {
     name: answers.name,
@@ -134,13 +177,21 @@ export async function promptForConfig(): Promise<SourceConfig> {
     usesApi: answers.uses.includes('api'),
     usesGraphql: answers.uses.includes('graphql'),
     usesHtml: answers.uses.includes('html'),
-    usesWebscraping: answers.uses.includes('webscraping'),
+    usesAlgolia: answers.uses.includes('algolia'),
     // Feature flags
     hasAuth: answers.hasAuth,
     hasLiveStreams: answers.hasLiveStreams,
     hasComments: answers.hasComments,
     hasPlaylists: answers.hasPlaylists,
     hasSearch: answers.hasSearch,
-    version: 1
+    version: 1,
+    // grayjay-sources.github.io specific options
+    _tags: repoOptions.tags ? repoOptions.tags.split(',').map((s: string) => s.trim()).filter((s: string) => s) : undefined,
+    _nsfw: repoOptions.nsfw || undefined,
+    _generatorUrl: repoOptions.generatorUrl || undefined,
+    _feeds: (repoOptions.feedsCommits || repoOptions.feedsReleases) ? {
+      commits: repoOptions.feedsCommits || undefined,
+      releases: repoOptions.feedsReleases || undefined
+    } : undefined
   };
 }

@@ -1,3 +1,5 @@
+/// <reference path="../../types/plugin.d.ts" />
+
 source.isPlaylistUrl = function (url: string): boolean {
   const urlLower = url.toLowerCase();
   return urlLower.includes('{{PLATFORM_HOSTNAME}}') && urlLower.includes('playlist');

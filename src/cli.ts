@@ -24,8 +24,8 @@ program
   .option('--logo-url <url>', 'Logo URL (optional, auto-resolves from favicon if not provided)')
   .option('--uses-api', 'Use REST API')
   .option('--uses-graphql', 'Use GraphQL API')
-  .option('--uses-html', 'Use HTML parsing/scraping')
-  .option('--uses-webscraping', 'Use web scraping')
+  .option('--uses-html', 'Use HTML parsing/web scraping (includes DOMParser)')
+  .option('--uses-algolia', 'Use Algolia search service')
   .option('--uses-auth', 'Enable authentication support')
   .option('--uses-live', 'Enable live streams support')
   .option('--uses-comments', 'Enable comments support')
@@ -34,6 +34,12 @@ program
   .option('-o, --output <directory>', 'Output directory', '.')
   .option('-i, --interactive', 'Interactive mode (prompt for all options)')
   .option('--js', 'Generate JavaScript project instead of TypeScript')
+  // grayjay-sources.github.io specific options
+  .option('--tags <tags>', 'Comma-separated tags (e.g., "video,music,live")')
+  .option('--nsfw', 'Mark source as NSFW content')
+  .option('--generator-url <url>', 'URL to web-based generator for custom instances')
+  .option('--feeds-commits <url>', 'URL to commits feed')
+  .option('--feeds-releases <url>', 'URL to releases feed')
   .parse(process.argv);
 
 async function main() {
@@ -70,18 +76,26 @@ async function main() {
         usesApi: options.usesApi,
         usesGraphql: options.usesGraphql,
         usesHtml: options.usesHtml,
-        usesWebscraping: options.usesWebscraping,
+        usesAlgolia: options.usesAlgolia,
         // Feature flags (only enabled if explicitly requested)
         hasAuth: options.usesAuth,
         hasLiveStreams: options.usesLive,
         hasComments: options.usesComments,
         hasPlaylists: options.usesPlaylists,
         hasSearch: options.usesSearch,
-        version: 1
+        version: 1,
+        // grayjay-sources.github.io specific options
+        _tags: options.tags ? options.tags.split(',').map((s: string) => s.trim()) : undefined,
+        _nsfw: options.nsfw || undefined,
+        _generatorUrl: options.generatorUrl || undefined,
+        _feeds: (options.feedsCommits || options.feedsReleases) ? {
+          commits: options.feedsCommits,
+          releases: options.feedsReleases
+        } : undefined
       };
       
       // Default to API if no technology specified
-      if (!config.usesApi && !config.usesGraphql && !config.usesHtml && !config.usesWebscraping) {
+      if (!config.usesApi && !config.usesGraphql && !config.usesHtml && !config.usesAlgolia) {
         config.usesApi = true;
       }
     }
