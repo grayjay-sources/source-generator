@@ -193,7 +193,7 @@ export class SourceGenerator {
         test: 'node scripts/test.js',
         prettier: 'npx prettier --write ./src/**/*.ts',
         publish: 'npm run build:sign && node scripts/publish.js',
-        submit: 'npm run build:sign && node scripts/submit.js',
+        submit: 'node scripts/submit.js',
         init: 'node scripts/init.js',
         postinstall: 'node scripts/init.js'
       },
