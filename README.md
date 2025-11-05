@@ -7,10 +7,12 @@ A powerful CLI tool to generate GrayJay source plugin skeleton projects with Typ
 - 🎯 Interactive CLI for easy setup
 - 📦 Complete project scaffolding
 - 🔧 TypeScript or JavaScript support
+- 🔐 **RSA Plugin Signing** - Automatic key generation and signature creation
 - 🖼️ Automatic icon and QR code generation
 - 📝 Pre-configured build system with Rollup
-- 🎨 Beautiful, modern project structure
-- ⚡ Ready-to-use template based on Dailymotion plugin
+- 🚀 Automated publishing workflow
+- 🎨 Beautiful, modular project structure
+- ⚡ Production-ready templates with best practices
 
 ## Installation
 
@@ -121,23 +123,42 @@ grayjay-generate --js -i
 ```
 my-platform/
 ├── src/
-│   ├── Script.ts          # Main plugin implementation
-│   └── constants.ts       # Constants and configuration
+│   ├── script.ts              # Main plugin entry point
+│   ├── constants.ts           # Platform constants
+│   ├── utils.ts               # Utility functions
+│   ├── api/                   # API client module (if using REST)
+│   │   └── client.ts
+│   ├── graphql/               # GraphQL queries (if using GraphQL)
+│   │   └── queries.ts
+│   ├── html/                  # HTML parsing (if using HTML)
+│   │   └── parser.ts
+│   ├── mappers/               # Data transformation
+│   │   └── index.ts
+│   ├── pagers/                # Pagination classes
+│   │   └── index.ts
+│   └── state/                 # State management (if using auth)
+│       └── index.ts
+├── dist/                      # Build output (gitignored)
+│   ├── config.json            # Minified configuration
+│   └── script.js              # Minified and compiled script
+├── .secrets/                  # Private keys (gitignored)
+│   └── signing_key.pem        # RSA private key for signing
 ├── assets/
-│   └── icon.png          # Auto-generated platform icon
-├── types/
-│   └── plugin.d.ts       # GrayJay plugin type definitions
-├── dist/                 # Build output (created after npm run build)
-│   ├── config.json
-│   ├── Script.js
-│   └── assets/
-├── config.json           # Plugin configuration
+│   ├── logo.png               # Auto-resolved platform logo
+│   ├── logo.svg               # SVG version (if available)
+│   └── qrcode.png             # QR code for installation
+├── scripts/
+│   ├── sign.js                # Plugin signing script
+│   └── publish.js             # Automated publishing script
+├── .github/
+│   └── workflows/
+│       └── release.yml        # Automated release workflow
+├── config.json                # Plugin configuration
 ├── package.json
 ├── tsconfig.json
 ├── rollup.config.js
 ├── README.md
-├── .gitignore
-└── qrcode.png           # QR code for installation
+└── .gitignore
 ```
 
 ## Development Workflow
@@ -163,17 +184,80 @@ After generating your plugin:
    npm run dev
    ```
 
-5. **Test in GrayJay:**
+5. **Sign the plugin:**
+   ```bash
+   npm run sign
+   ```
+   This automatically generates an RSA key (first time) and signs your plugin
+
+6. **Build and sign in one command:**
+   ```bash
+   npm run build:sign
+   ```
+
+7. **Test in GrayJay:**
    - Open GrayJay app
-   - Scan the QR code in `qrcode.png`
+   - Scan the QR code in `assets/qrcode.png`
    - Or manually import the plugin from the `dist/` folder
+
+## 🔐 Plugin Signing
+
+Generated plugins include automatic RSA signing for security:
+
+### How It Works
+
+1. **Automatic Key Generation**: On first `npm run sign`, a 2048-bit RSA private key is automatically generated in `.secrets/signing_key.pem`
+
+2. **Signature Creation**: Creates a SHA512 signature of your `dist/script.js` file
+
+3. **Public Key Extraction**: Extracts the public key from the private key for GrayJay verification
+
+4. **Config Update**: Automatically updates `dist/config.json` with `scriptSignature` and `scriptPublicKey` fields
+
+### Commands
+
+```bash
+# Sign the plugin (after building)
+npm run sign
+
+# Build and sign in one command
+npm run build:sign
+
+# Build, sign, and publish
+npm run build:publish
+```
+
+### Security
+
+- ✅ Private key stored in `.secrets/` (gitignored)
+- ✅ Automatic key validation before use
+- ✅ SHA512 signature for strong security
+- ✅ Compatible with GrayJay's verification system
+
+### Requirements
+
+- **OpenSSL**: Required for signing
+  - Linux/Mac: Usually pre-installed
+  - Windows: Available via Git Bash or WSL
+
+### Manual Signing
+
+If you need to sign manually:
+
+```bash
+# Generate signature
+openssl dgst -sha512 -sign .secrets/signing_key.pem dist/script.js | openssl base64 -A
+
+# Extract public key
+openssl rsa -pubout -outform DER -in .secrets/signing_key.pem | openssl pkey -pubin -inform DER -outform PEM
+```
 
 ## Plugin Capabilities
 
 The generator supports various platform capabilities:
 
 - **REST API**: Standard HTTP REST API integration
-- **GraphQL**: GraphQL query support
+- **GraphQL**: GraphQL query support with persisted queries
 - **HTML Parsing**: DOM parsing for web scraping
 - **Web Scraping**: Advanced web scraping capabilities
 - **Authentication**: User login and session management
@@ -213,8 +297,11 @@ await generator.generate();
 
 ## Requirements
 
-- Node.js >= 14
-- npm >= 6.14.4
+- **Node.js** >= 14
+- **npm** >= 6.14.4
+- **OpenSSL** (for plugin signing)
+  - Linux/Mac: Usually pre-installed
+  - Windows: Available via Git Bash, WSL, or [OpenSSL for Windows](https://slproweb.com/products/Win32OpenSSL.html)
 
 ## Contributing
 
