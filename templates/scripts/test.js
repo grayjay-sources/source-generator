@@ -162,35 +162,57 @@ async function main() {
     );
     const server = await startLocalServer(LOCAL_SERVER_PORT);
 
+    // Choose IP in same subnet as dev server for reachability
     const localIPs = utils.getLocalIPs();
-    const localIP = localIPs[0] || "localhost";
+    const devServerSubnet = devServerHost.split(".").slice(0, 3).join(".");
+    let localIP =
+      localIPs.find((ip) => ip.startsWith(devServerSubnet)) ||
+      localIPs[0] ||
+      "localhost";
+
     log(
       `   ✅ Server running at http://${localIP}:${LOCAL_SERVER_PORT}`,
       colors.green
     );
+    log(
+      `   Dev server: ${devServerHost} (subnet: ${devServerSubnet}.x)`,
+      colors.reset
+    );
 
     // Step 5: Load portal and inject plugin
     log(`\n🔧 Loading dev portal and injecting plugin...`, colors.cyan);
+
+    // Use the dev server's reachable IP for the script URL
     const scriptUrl = `http://${localIP}:${LOCAL_SERVER_PORT}/script.js`;
+    log(`   Script URL: ${scriptUrl}`, colors.reset);
 
     await client.loadPortal(10000);
     await client.updateTestPlugin(scriptUrl, config);
 
     log(`   ✅ Plugin injected`, colors.green);
 
+    // Verify the plugin loaded by checking enable() result
+    log(`   🔍 Verifying plugin loaded...`, colors.yellow);
+    const verifyResult = await client.testMethod("enable");
+    if (verifyResult.success && verifyResult.result) {
+      const loadedConfig = verifyResult.result;
+      if (loadedConfig.name === config.name) {
+        log(`   ✅ Correct plugin loaded: ${config.name}`, colors.green);
+      } else {
+        log(
+          `   ⚠️  Warning: Expected ${config.name} but got ${
+            loadedConfig.name || "unknown"
+          }`,
+          colors.yellow
+        );
+      }
+    }
+
     // Step 6: Test plugin methods
     log(`\n🧪 Testing Plugin Methods`, colors.cyan);
     log(
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       colors.reset
-    );
-
-    // Test enable
-    log(`\n   Testing enable()...`, colors.yellow);
-    const enableResult = await client.testMethod("enable");
-    log(
-      `   • enable(): ${enableResult.success ? "✅" : "❌"}`,
-      enableResult.success ? colors.green : colors.red
     );
 
     // Test getHome
@@ -206,6 +228,13 @@ async function main() {
         ? homeResult.result
         : homeResult.result.results || [];
       log(`      Videos: ${videos.length}`, colors.reset);
+
+      if (videos.length === 0) {
+        log(
+          `      ℹ️  Empty result (expected for skeleton plugin)`,
+          colors.cyan
+        );
+      }
     }
 
     // Open browser to dev portal
