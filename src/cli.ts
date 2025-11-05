@@ -114,18 +114,22 @@ async function main() {
     const sanitizedName = config.name.toLowerCase().replace(/\s+/g, '-');
     const outputDir = path.resolve(process.cwd(), options.output === '.' ? sanitizedName : options.output);
 
+    // Determine if TypeScript or JavaScript
+    // Priority: config.typescript (from interactive) > !options.js (from CLI flag)
+    const useTypeScript = config.typescript !== undefined ? config.typescript : !options.js;
+
     console.log(chalk.cyan('\n📦 Generating GrayJay Source Plugin...\n'));
     console.log(chalk.gray(`Name: ${config.name}`));
     console.log(chalk.gray(`Platform: ${config.platformUrl}`));
     console.log(chalk.gray(`Output: ${outputDir}`));
-    console.log(chalk.gray(`Type: ${options.js ? 'JavaScript' : 'TypeScript'}\n`));
+    console.log(chalk.gray(`Type: ${useTypeScript ? 'TypeScript' : 'JavaScript'}\n`));
 
     const spinner = ora('Creating project structure...').start();
 
     const generator = new SourceGenerator({
       outputDir,
       config,
-      typescript: !options.js
+      typescript: useTypeScript
     });
 
     await generator.generate();

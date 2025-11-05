@@ -7,6 +7,8 @@ export interface SourceConfig {
   repositoryUrl: string;
   baseUrl: string;
   logoUrl?: string; // Logo URL (auto-resolved from favicon if not provided)
+  // Language preference
+  typescript?: boolean; // Use TypeScript (default) or JavaScript
   // Technology flags
   usesApi?: boolean;
   usesGraphql?: boolean;

@@ -72,6 +72,16 @@ export async function promptForConfig(): Promise<SourceConfig> {
       }
     },
     {
+      type: 'list',
+      name: 'language',
+      message: 'Project language:',
+      choices: [
+        { name: 'TypeScript (recommended)', value: 'typescript' },
+        { name: 'JavaScript', value: 'javascript' }
+      ],
+      default: 'typescript'
+    },
+    {
       type: 'checkbox',
       name: 'uses',
       message: 'What technologies does this source use?',
@@ -173,6 +183,8 @@ export async function promptForConfig(): Promise<SourceConfig> {
     repositoryUrl: answers.repositoryUrl,
     baseUrl: answers.baseUrl,
     logoUrl: answers.logoUrl || undefined,
+    // Language preference
+    typescript: answers.language === 'typescript',
     // Convert uses array to individual flags
     usesApi: answers.uses.includes('api'),
     usesGraphql: answers.uses.includes('graphql'),
