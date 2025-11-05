@@ -1,317 +1,203 @@
 # @grayjay-sources/source-generator
 
-A powerful CLI tool to generate GrayJay source plugin skeleton projects with TypeScript or JavaScript.
+CLI tool to generate GrayJay source plugin skeleton projects with TypeScript or JavaScript.
 
 ## Features
 
 - 🎯 Interactive CLI for easy setup
-- 📦 Complete project scaffolding
 - 🔧 TypeScript or JavaScript support
-- 🔐 **RSA Plugin Signing** - Automatic key generation and signature creation
+- 🔐 Automatic RSA plugin signing
+- 🧪 Integrated dev portal testing
+- 📦 Complete project scaffolding with build system
 - 🖼️ Automatic icon and QR code generation
-- 📝 Pre-configured build system with Rollup
-- 🚀 Automated publishing workflow
-- 🎨 Beautiful, modular project structure
-- ⚡ Production-ready templates with best practices
 
 ## Installation
 
-### Global Installation (Recommended)
-
 ```bash
+# Global installation (recommended)
 npm install -g @grayjay-sources/source-generator
-```
 
-### Local Usage with npx
-
-```bash
+# Or use with npx
 npx @grayjay-sources/source-generator
 ```
 
 ## Usage
 
-### Interactive Mode (Recommended)
-
-Simply run the command and follow the prompts:
+### Interactive Mode
 
 ```bash
 grayjay-generate
-```
-
-Or use the short alias:
-
-```bash
+# or
 gjsg
 ```
 
-### Command Line Arguments
+### Command Line
 
 ```bash
 grayjay-generate \
   --name "My Platform" \
   --platform-url "https://example.com" \
-  --description "My platform description" \
-  --author "Your Name" \
-  --repository-url "https://github.com/username/repo" \
+  --repository-url "https://github.com/user/repo" \
   --base-url "https://api.example.com" \
   --uses-api \
-  --uses-graphql \
   --uses-auth \
-  --uses-comments \
-  --uses-playlists \
   --uses-search
 ```
 
-### Options
+### Key Options
 
-| Option | Alias | Description | Required |
-|--------|-------|-------------|----------|
-| `--name <name>` | `-n` | Platform name | Yes |
-| `--platform-url <url>` | `-p` | Platform URL (e.g., https://example.com) | Yes |
-| `--repository-url <url>` | `-r` | Repository URL | Yes |
-| `--base-url <url>` | `-b` | Base API URL | Yes |
-| `--description <text>` | `-d` | Platform description | No |
-| `--author <name>` | `-a` | Author name | No |
-| `--author-url <url>` | | Author URL | No |
-| `--logo-url <url>` | | Logo URL (auto-resolves from favicon if omitted) | No |
-| `--uses-api` | | Use REST API | No |
-| `--uses-graphql` | | Use GraphQL API | No |
-| `--uses-html` | | Use HTML parsing | No |
-| `--uses-webscraping` | | Use web scraping | No |
-| `--uses-auth` | | Enable authentication support | No |
-| `--uses-live` | | Enable live streams support | No |
-| `--uses-comments` | | Enable comments support | No |
-| `--uses-playlists` | | Enable playlists support | No |
-| `--uses-search` | | Enable search support | No |
-| `--output <dir>` | `-o` | Output directory | No |
-| `--interactive` | `-i` | Force interactive mode | No |
-| `--js` | | Generate JavaScript instead of TypeScript | No |
+| Option                   | Description                               |
+| ------------------------ | ----------------------------------------- |
+| `--name <name>`          | Platform name (required)                  |
+| `--platform-url <url>`   | Platform URL (required)                   |
+| `--repository-url <url>` | Repository URL (required)                 |
+| `--base-url <url>`       | Base API URL (required)                   |
+| `--uses-api`             | Use REST API                              |
+| `--uses-graphql`         | Use GraphQL API                           |
+| `--uses-auth`            | Enable authentication                     |
+| `--uses-comments`        | Enable comments                           |
+| `--uses-playlists`       | Enable playlists                          |
+| `--uses-search`          | Enable search                             |
+| `--js`                   | Generate JavaScript instead of TypeScript |
 
-## Examples
-
-### Example 1: Complete Command Line
-
-```bash
-grayjay-generate \
-  --name "Vimeo" \
-  --platform-url "https://vimeo.com" \
-  --description "Vimeo video platform" \
-  --author "Bluscream" \
-  --repository-url "https://github.com/grayjay-sources/vimeo" \
-  --base-url "https://api.vimeo.com" \
-  --uses-api \
-  --uses-graphql \
-  --uses-auth \
-  --uses-comments \
-  --uses-playlists
-```
-
-### Example 2: Minimal Command (Interactive Prompts for Rest)
-
-```bash
-grayjay-generate -i
-```
-
-### Example 3: JavaScript Project
-
-```bash
-grayjay-generate --js -i
-```
-
-## Generated Project Structure
+## Generated Project
 
 ```
 my-platform/
 ├── src/
-│   ├── script.ts              # Main plugin entry point
-│   ├── constants.ts           # Platform constants
-│   ├── utils.ts               # Utility functions
-│   ├── api/                   # API client module (if using REST)
-│   │   └── client.ts
-│   ├── graphql/               # GraphQL queries (if using GraphQL)
-│   │   └── queries.ts
-│   ├── html/                  # HTML parsing (if using HTML)
-│   │   └── parser.ts
-│   ├── mappers/               # Data transformation
-│   │   └── index.ts
-│   ├── pagers/                # Pagination classes
-│   │   └── index.ts
-│   └── state/                 # State management (if using auth)
-│       └── index.ts
-├── dist/                      # Build output (gitignored)
-│   ├── config.json            # Minified configuration
-│   └── script.js              # Minified and compiled script
-├── .secrets/                  # Private keys (gitignored)
-│   └── signing_key.pem        # RSA private key for signing
-├── assets/
-│   ├── logo.png               # Auto-resolved platform logo
-│   ├── logo.svg               # SVG version (if available)
-│   └── qrcode.png             # QR code for installation
-├── scripts/
-│   ├── sign.js                # Plugin signing script
-│   └── publish.js             # Automated publishing script
-├── .github/
-│   └── workflows/
-│       └── release.yml        # Automated release workflow
-├── config.json                # Plugin configuration
+│   ├── script.ts           # Main plugin entry
+│   ├── api/client.ts       # API client
+│   ├── mappers/            # Data transformation
+│   └── state/              # State management
+├── dist/                   # Build output
+├── .secrets/               # Private keys (gitignored)
+├── assets/                 # Logo, QR code
+├── scripts/                # Sign, publish, test
+├── config.json
 ├── package.json
-├── tsconfig.json
-├── rollup.config.js
-├── README.md
-└── .gitignore
+└── rollup.config.js
 ```
 
 ## Development Workflow
 
-After generating your plugin:
-
-1. **Install dependencies:**
-   ```bash
-   cd my-platform
-   npm install
-   ```
-
-2. **Implement your plugin logic:**
-   Edit `src/Script.ts` and add your API calls and data mapping
-
-3. **Build the plugin:**
-   ```bash
-   npm run build
-   ```
-
-4. **Development mode (watch for changes):**
-   ```bash
-   npm run dev
-   ```
-
-5. **Sign the plugin:**
-   ```bash
-   npm run sign
-   ```
-   This automatically generates an RSA key (first time) and signs your plugin
-
-6. **Build and sign in one command:**
-   ```bash
-   npm run build:sign
-   ```
-
-7. **Test in GrayJay:**
-   - Open GrayJay app
-   - Scan the QR code in `assets/qrcode.png`
-   - Or manually import the plugin from the `dist/` folder
-
-## 🔐 Plugin Signing
-
-Generated plugins include automatic RSA signing for security:
-
-### How It Works
-
-1. **Automatic Key Generation**: On first `npm run sign`, a 2048-bit RSA private key is automatically generated in `.secrets/signing_key.pem`
-
-2. **Signature Creation**: Creates a SHA512 signature of your `dist/script.js` file
-
-3. **Public Key Extraction**: Extracts the public key from the private key for GrayJay verification
-
-4. **Config Update**: Automatically updates `dist/config.json` with `scriptSignature` and `scriptPublicKey` fields
-
-### Commands
-
 ```bash
-# Sign the plugin (after building)
+cd my-platform
+npm install
+
+# Build
+npm run build
+
+# Development mode (watch)
+npm run dev
+
+# Test with auto-discovery
+npm run test
+
+# Test with manual IP
+npm run test -- --dev-ip 192.168.1.100
+
+# Sign plugin
 npm run sign
 
-# Build and sign in one command
+# Build and sign
 npm run build:sign
-
-# Build, sign, and publish
-npm run build:publish
 ```
 
-### Security
+## Testing
 
-- ✅ Private key stored in `.secrets/` (gitignored)
-- ✅ Automatic key validation before use
-- ✅ SHA512 signature for strong security
-- ✅ Compatible with GrayJay's verification system
-
-### Requirements
-
-- **OpenSSL**: Required for signing
-  - Linux/Mac: Usually pre-installed
-  - Windows: Available via Git Bash or WSL
-
-### Manual Signing
-
-If you need to sign manually:
+The generated project includes automated testing via the GrayJay Dev Portal:
 
 ```bash
-# Generate signature
-openssl dgst -sha512 -sign .secrets/signing_key.pem dist/script.js | openssl base64 -A
-
-# Extract public key
-openssl rsa -pubout -outform DER -in .secrets/signing_key.pem | openssl pkey -pubin -inform DER -outform PEM
+npm run test
 ```
+
+This will:
+
+- Auto-discover GrayJay devices on your network (mDNS)
+- Start a local HTTP server for plugin files
+- Automatically inject your plugin into the dev portal
+- Run tests on `enable()`, `getHome()`, `search()`, etc.
+- Show detailed pass/fail results
+
+**Requirements:**
+
+- Enable Dev Portal in GrayJay app (Settings → Developer)
+- Same network for dev machine and GrayJay device
+- Test script auto-selects optimal local IP for reachability
+
+## Plugin Signing
+
+Automatic RSA signing for security:
+
+```bash
+npm run sign
+```
+
+**What it does:**
+
+1. Generates 2048-bit RSA key (first time only) in `.secrets/signing_key.pem`
+2. Creates SHA512 signature of `dist/script.js`
+3. Updates `dist/config.json` with signature and public key
+
+**Security:**
+
+- Private key in `.secrets/` (gitignored)
+- SHA512 signature
+- Compatible with GrayJay verification
+
+**Requirements:**
+
+- OpenSSL (pre-installed on Linux/Mac, Git Bash/WSL on Windows)
+
+## Available Scripts
+
+| Command                 | Description              |
+| ----------------------- | ------------------------ |
+| `npm run build`         | Build plugin             |
+| `npm run dev`           | Watch mode               |
+| `npm run test`          | Auto-test via dev portal |
+| `npm run sign`          | Sign plugin              |
+| `npm run build:sign`    | Build and sign           |
+| `npm run build:publish` | Build, sign, and publish |
 
 ## Plugin Capabilities
 
-The generator supports various platform capabilities:
+The generator supports:
 
-- **REST API**: Standard HTTP REST API integration
-- **GraphQL**: GraphQL query support with persisted queries
-- **HTML Parsing**: DOM parsing for web scraping
-- **Web Scraping**: Advanced web scraping capabilities
-- **Authentication**: User login and session management
-- **Live Streams**: Real-time video streaming
-- **Comments**: User comments and discussions
-- **Playlists**: Video playlists and collections
-- **Search**: Content search functionality
+- REST API / GraphQL
+- HTML parsing / Web scraping
+- Authentication
+- Live streams
+- Comments / Playlists
+- Search
+
+## Requirements
+
+- Node.js >= 14
+- npm >= 6.14.4
+- OpenSSL (for signing)
 
 ## Programmatic Usage
 
-You can also use the generator programmatically:
-
 ```typescript
-import { SourceGenerator } from '@grayjay-sources/source-generator';
+import { SourceGenerator } from "@grayjay-sources/source-generator";
 
 const generator = new SourceGenerator({
-  outputDir: './my-plugin',
+  outputDir: "./my-plugin",
   config: {
-    name: 'My Platform',
-    platformUrl: 'https://example.com',
-    description: 'My platform description',
-    author: 'Your Name',
-    repositoryUrl: 'https://github.com/username/repo',
-    baseUrl: 'https://api.example.com',
-    uses: ['api', 'graphql'],
+    name: "My Platform",
+    platformUrl: "https://example.com",
+    repositoryUrl: "https://github.com/user/repo",
+    baseUrl: "https://api.example.com",
+    uses: ["api", "graphql"],
     hasAuth: true,
-    hasComments: true,
-    hasPlaylists: true,
-    hasSearch: true,
-    version: 1
+    version: 1,
   },
-  typescript: true
+  typescript: true,
 });
 
 await generator.generate();
 ```
-
-## Requirements
-
-- **Node.js** >= 14
-- **npm** >= 6.14.4
-- **OpenSSL** (for plugin signing)
-  - Linux/Mac: Usually pre-installed
-  - Windows: Available via Git Bash, WSL, or [OpenSSL for Windows](https://slproweb.com/products/Win32OpenSSL.html)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
@@ -321,15 +207,5 @@ MIT
 
 - [GrayJay](https://grayjay.app/)
 - [GrayJay Plugin Documentation](https://github.com/futo-org/grayjay)
-- [NPM Package](https://www.npmjs.com/package/@grayjay/source-generator)
+- [NPM Package](https://www.npmjs.com/package/@grayjay-sources/source-generator)
 - [GitHub Repository](https://github.com/grayjay-sources/source-generator)
-
-## Support
-
-For issues and questions:
-- GitHub Issues: https://github.com/grayjay-sources/source-generator/issues
-- GrayJay Discord: https://discord.gg/grayjay
-
-## Acknowledgments
-
-This generator is based on the official GrayJay plugin templates and the Dailymotion plugin structure.
