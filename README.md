@@ -1,4 +1,4 @@
-# @grayjay/source-generator
+# @grayjay-sources/source-generator
 
 A powerful CLI tool to generate GrayJay source plugin skeleton projects with TypeScript or JavaScript.
 
@@ -19,13 +19,13 @@ A powerful CLI tool to generate GrayJay source plugin skeleton projects with Typ
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g @grayjay/source-generator
+npm install -g @grayjay-sources/source-generator
 ```
 
 ### Local Usage with npx
 
 ```bash
-npx @grayjay/source-generator
+npx @grayjay-sources/source-generator
 ```
 
 ## Usage
@@ -271,7 +271,7 @@ The generator supports various platform capabilities:
 You can also use the generator programmatically:
 
 ```typescript
-import { SourceGenerator } from '@grayjay/source-generator';
+import { SourceGenerator } from '@grayjay-sources/source-generator';
 
 const generator = new SourceGenerator({
   outputDir: './my-plugin',

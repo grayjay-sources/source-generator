@@ -1,5 +1,5 @@
 {
-  "name": "@grayjay/source-generator",
+  "name": "@grayjay-sources/source-generator",
   "version": "1.0.0",
   "description": "CLI tool to generate GrayJay source plugin skeleton projects",
   "main": "dist/index.js",
