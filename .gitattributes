@@ -1,0 +1,32 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# TypeScript
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# JavaScript
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+
+# JSON
+*.json text eol=lf
+
+# Markdown
+*.md text eol=lf
+
+# YAML
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Git
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Lockfiles
+package-lock.json -diff
+
