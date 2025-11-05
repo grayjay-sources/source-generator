@@ -101,6 +101,12 @@ npm run sign
 
 # Build and sign
 npm run build:sign
+
+# Publish plugin (includes build and sign)
+npm run publish
+
+# Submit to GrayJay registry (includes build and sign)
+npm run submit
 ```
 
 ## Testing
@@ -151,14 +157,15 @@ npm run sign
 
 ## Available Scripts
 
-| Command                 | Description              |
-| ----------------------- | ------------------------ |
-| `npm run build`         | Build plugin             |
-| `npm run dev`           | Watch mode               |
-| `npm run test`          | Auto-test via dev portal |
-| `npm run sign`          | Sign plugin              |
-| `npm run build:sign`    | Build and sign           |
-| `npm run build:publish` | Build, sign, and publish |
+| Command              | Description                        |
+| -------------------- | ---------------------------------- |
+| `npm run build`      | Build plugin                       |
+| `npm run dev`        | Watch mode                         |
+| `npm run test`       | Auto-test via dev portal           |
+| `npm run sign`       | Sign plugin                        |
+| `npm run build:sign` | Build and sign                     |
+| `npm run publish`    | Build, sign, and publish to GitHub |
+| `npm run submit`     | Build, sign, and submit to GrayJay |
 
 ## Plugin Capabilities
 
