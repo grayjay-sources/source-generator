@@ -94,14 +94,17 @@ function extractPublicKey() {
   log("🔓 Extracting public key...", colors.cyan);
 
   try {
-    const publicKey = execSync(
-      `openssl rsa -pubout -outform DER -in "${PRIVATE_KEY_PATH}" 2>/dev/null | openssl pkey -pubin -inform DER -outform PEM | tail -n +2 | head -n -1`,
-      {
-        encoding: "utf8",
-        shell: process.platform === "win32" ? "bash" : undefined,
-      }
-    )
-      .replace(/\n/g, "")
+    // Extract public key in two steps for better Windows compatibility
+    const publicKeyPem = execSync(
+      `openssl rsa -pubout -outform PEM -in "${PRIVATE_KEY_PATH}"`,
+      { encoding: "utf8", stdio: ['pipe', 'pipe', 'ignore'] }
+    );
+    
+    // Remove BEGIN/END lines and newlines
+    const publicKey = publicKeyPem
+      .split('\n')
+      .filter(line => !line.includes('BEGIN') && !line.includes('END') && line.trim())
+      .join('')
       .trim();
 
     log("✅ Public key extracted", colors.green);
