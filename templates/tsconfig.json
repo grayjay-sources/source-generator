@@ -4,6 +4,7 @@
     "module": "ESNext",
     "rootDir": "./src",
     "typeRoots": ["node_modules/@types"],
+    "types": ["node", "grayjay-source"],
     "allowJs": true,
     "checkJs": true,
     "sourceMap": false,

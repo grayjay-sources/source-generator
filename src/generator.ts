@@ -126,16 +126,10 @@ export class SourceGenerator {
         }
       }
       
-      // Step 2: Build the project
-      console.log('🔨 Building plugin...');
-      execSync('npm run build', { 
-        cwd: outputDir, 
-        stdio: 'inherit',
-        encoding: 'utf-8'
-      });
-      console.log('✅ Build successful\n');
+      // Note: init.js (run via postinstall) already builds the project
+      // No need to build again here
       
-      // Step 3: Try to sign (optional, will skip if OpenSSL not available)
+      // Step 2: Try to sign (optional, will skip if OpenSSL not available)
       console.log('🔐 Attempting to sign plugin...');
       try {
         execSync('npm run sign', { 
@@ -213,18 +207,18 @@ export class SourceGenerator {
         url: config.repositoryUrl
       },
       devDependencies: {
-        '@grayjay-sources/dev-portal-client': '^1.3.1',
+        '@grayjay-sources/dev-portal-client': '^1.3.3',
         '@kaidelorenzo/grayjay-polyfill': 'gitlab:kaidelorenzo/grayjay-polyfill#ed272f793e402d6fbdc95859cf777c188379b56f',
         '@types/grayjay-source': 'gitlab:kaidelorenzo/grayjay-plugin-types#9dcec6910917e3ddc5a663f20be84bd97dc1fe9a',
-        '@rollup/plugin-commonjs': '25.0.8',
-        '@rollup/plugin-node-resolve': '15.2.3',
+        '@rollup/plugin-commonjs': '28.0.2',
+        '@rollup/plugin-node-resolve': '15.3.0',
         '@rollup/plugin-terser': '0.4.4',
-        '@rollup/plugin-typescript': '11.1.6',
-        'rollup': '4.18.0',
+        '@rollup/plugin-typescript': '12.1.2',
+        'rollup': '4.52.5',
         'rollup-plugin-copy': '3.5.0',
-        'rollup-plugin-delete': '2.0.0',
-        'tslib': '2.6.2',
-        'typescript': '5.4.5'
+        'rollup-plugin-delete': '2.1.0',
+        'tslib': '2.8.1',
+        'typescript': '5.7.2'
       },
       optionalDependencies: {
         'qrcode': '^1.5.3'   // For QR code generation in utils (dev-portal-client handles discovery)
