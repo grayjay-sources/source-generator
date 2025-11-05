@@ -337,7 +337,7 @@ export class SourceGenerator {
   }
 
   private async generateGitignore(): Promise<void> {
-    const gitignore = await this.getRawTemplate('.gitignore');
+    const gitignore = await this.getRawTemplate('gitignore');
     await fs.writeFile(
       path.join(this.options.outputDir, '.gitignore'),
       gitignore
