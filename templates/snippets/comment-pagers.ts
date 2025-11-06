@@ -1,6 +1,6 @@
 
 
-class CommentsPager extends CommentPager {
+export class CommentsPager extends CommentPager {
   private videoUrl: string;
   private page: number = 0;
   private hasMorePages: boolean = true;
@@ -24,7 +24,7 @@ class CommentsPager extends CommentPager {
   }
 }
 
-class SubCommentsPager extends CommentPager {
+export class SubCommentsPager extends CommentPager {
   private parentComment: Comment;
   private page: number = 0;
   private hasMorePages: boolean = true;
@@ -47,4 +47,3 @@ class SubCommentsPager extends CommentPager {
     return [];
   }
 }
-

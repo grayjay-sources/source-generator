@@ -3,27 +3,37 @@
 
 
 
-import { BASE_URL, PLATFORM } from './constants';
 {{IMPORTS}}
 
-interface Config {
-  name: string;
-  platformUrl: string;
-  version: number;
-}
-
-let config: Config;
-
-// Plugin state
-const state = {
-  {{STATE_PROPERTIES}}
+/**
+ * Plugin runtime context
+ * Contains config, settings, and persistent state
+ */
+const plugin = {
+  config: null as SourceConfig | null,
+  settings: {} as Record<string, string>,
+  state: {
+    {{STATE_PROPERTIES}}
+  }
 };
 
 // Source Methods
-source.enable = function (conf: any) {
-  config = conf;
-  {{LOAD_STATE}}
-  log('Plugin enabled: ' + config.name);
+source.enable = function (conf: SourceConfig, settings: Record<string, string>, saveStateStr?: string) {
+  // Initialize plugin context
+  plugin.config = conf || {};
+  plugin.settings = settings || {};
+  
+  // Load saved state (always, even if empty)
+  if (saveStateStr) {
+    try {
+      const savedState = JSON.parse(saveStateStr);
+      Object.assign(plugin.state, savedState);
+    } catch (e) {
+      log('Warning: Failed to load saved state: ' + e);
+    }
+  }
+  
+  log('Plugin enabled: ' + conf.name);
 };
 
 source.getHome = function (): VideoPager {
@@ -110,7 +120,7 @@ source.getContentDetails = function (url: string): PlatformVideoDetails {
 {{COMMENT_METHODS}}
 
 source.saveState = function (): string {
-  return JSON.stringify(state);
+  return JSON.stringify(plugin.state);
 };
 
 // Helper Functions

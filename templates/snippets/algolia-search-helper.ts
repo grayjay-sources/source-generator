@@ -5,9 +5,12 @@
 import * as network from '../utils/network';
 {{ALGOLIA_GRAPHQL_IMPORT}}
 
-// TODO: Add these to your constants.ts file:
-// export const ALGOLIA_APP_ID = 'YOUR_APP_ID';
-// export const BASE_URL_ALGOLIA = 'https://YOUR_APP_ID-dsn.algolia.net/1/indexes/*/queries';
+// TODO: Add these to your config.json constants:
+// "constants": {
+//   "algoliaAppId": "YOUR_APP_ID",
+//   "algoliaBaseUrl": "https://YOUR_APP_ID-dsn.algolia.net/1/indexes/*/queries",
+//   "algoliaIndexName": "your_index_name"
+// }
 
 /**
  * Get Algolia API key from platform's API
@@ -20,9 +23,9 @@ function refreshAlgoliaApiKey(): void {
     {{ALGOLIA_KEY_FETCH}}
     
     if (data && data.algoliaApiKey) {
-      state.algoliaApiKey = data.algoliaApiKey.key || '';
+      plugin.state.algoliaApiKey = data.algoliaApiKey.key || '';
       // API keys usually have expiration timestamps
-      state.algoliaApiKeyExpiration = Date.now() + (24 * 60 * 60 * 1000);
+      plugin.state.algoliaApiKeyExpiration = Date.now() + (24 * 60 * 60 * 1000);
       log('Algolia API key refreshed');
     }
   } catch (e) {
@@ -35,7 +38,7 @@ function refreshAlgoliaApiKey(): void {
  */
 function isAlgoliaKeyValid(): boolean {
   const currentTime = Date.now();
-  return state.algoliaApiKey && state.algoliaApiKeyExpiration > currentTime;
+  return plugin.state.algoliaApiKey && plugin.state.algoliaApiKeyExpiration > currentTime;
 }
 
 /**
@@ -55,28 +58,38 @@ function searchWithAlgolia(
     refreshAlgoliaApiKey();
   }
   
-  if (!state.algoliaApiKey) {
+  if (!plugin.state.algoliaApiKey) {
     return [{ code: 'NO_API_KEY', message: 'No Algolia API key available' }, null];
+  }
+  
+  // Get Algolia config from plugin config
+  const pluginConfig = plugin.config as any;
+  const algoliaAppId = pluginConfig?.constants?.algoliaAppId || '';
+  const algoliaBaseUrl = pluginConfig?.constants?.algoliaBaseUrl || '';
+  const algoliaIndexName = pluginConfig?.constants?.algoliaIndexName || '{{ALGOLIA_INDEX_NAME}}';
+  
+  if (!algoliaAppId || !algoliaBaseUrl) {
+    return [{ code: 'CONFIG_ERROR', message: 'Algolia configuration missing in config.json constants' }, null];
   }
   
   // Build Algolia search request
   const algoliaRequest = {
     requests: [
       {
-        indexName: '{{ALGOLIA_INDEX_NAME}}', // e.g., 'joyn_prod', 'twitch_streams'
+        indexName: algoliaIndexName, // e.g., 'joyn_prod', 'twitch_streams'
         params: `query=${encodeURIComponent(query)}&hitsPerPage=${hitsPerPage}&page=${page}`
       }
     ]
   };
   
   const headers = {
-    'x-algolia-application-id': ALGOLIA_APP_ID,
-    'x-algolia-api-key': state.algoliaApiKey
+    'x-algolia-application-id': algoliaAppId,
+    'x-algolia-api-key': plugin.state.algoliaApiKey
   };
   
   try {
     const data = network.postJson(
-      BASE_URL_ALGOLIA,
+      algoliaBaseUrl,
       algoliaRequest,
       { headers, retries: 2, throwOnError: false }
     );

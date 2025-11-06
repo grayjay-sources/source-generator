@@ -16,6 +16,9 @@ class APIClient {
    */
   private getUrl(endpoint: string): string {
     const baseUrl = getBaseUrl();
+    if (!baseUrl) {
+      throw new ScriptException('ConfigError', 'Base URL not configured. Check settings[baseUrl].options in config.json');
+    }
     // Ensure proper URL joining (handle trailing/leading slashes)
     const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

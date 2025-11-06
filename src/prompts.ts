@@ -61,14 +61,18 @@ export async function promptForConfig(): Promise<SourceConfig> {
     {
       type: 'input',
       name: 'baseUrl',
-      message: 'Base API URL (e.g., https://api.example.com):',
+      message: 'Base API URL(s) - comma-separated for multiple (e.g., https://api.example.com, https://api2.example.com):',
       validate: (input) => {
-        try {
-          new URL(input);
-          return true;
-        } catch {
-          return 'Please enter a valid URL';
+        if (!input) return 'At least one base URL is required';
+        const urls = input.split(',').map((u: string) => u.trim()).filter((u: string) => u);
+        for (const url of urls) {
+          try {
+            new URL(url);
+          } catch {
+            return `Invalid URL: ${url}`;
+          }
         }
+        return true;
       }
     },
     {

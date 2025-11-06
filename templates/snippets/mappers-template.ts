@@ -1,7 +1,5 @@
 
 
-import { PLATFORM, BASE_URL } from './constants';
-
 // Mapper functions convert platform-specific data structures to GrayJay types
 
 export function assetToGrayjayVideo(
@@ -16,21 +14,23 @@ export function assetToGrayjayVideo(
   const thumbnail = asset.image || asset.thumbnail || '';
   
   // Build video URL
-  const url = asset.url || `${BASE_URL}/video/${videoId}`;
+  const platformName = plugin.config?.name || '{{PLATFORM_NAME}}';
+  const platformUrl = plugin.config?.platformUrl || '';
+  const url = asset.url || `${platformUrl}/video/${videoId}`;
   
   // Create author/channel link
   const author = asset.channel || asset.author
     ? new PlatformAuthorLink(
-        new PlatformID(PLATFORM, asset.channel?.id || asset.author?.id || '', pluginId, 3),
+        new PlatformID(platformName, asset.channel?.id || asset.author?.id || '', pluginId, 3),
         asset.channel?.name || asset.author?.name || '',
         asset.channel?.url || asset.author?.url || '',
         asset.channel?.avatar || asset.author?.avatar || '',
         asset.channel?.subscribers || 0
       )
     : new PlatformAuthorLink(
-        new PlatformID(PLATFORM, 'unknown', pluginId, 3),
-        PLATFORM,
-        BASE_URL,
+        new PlatformID(platformName, 'unknown', pluginId, 3),
+        platformName,
+        platformUrl,
         '',
         0
       );
@@ -41,7 +41,7 @@ export function assetToGrayjayVideo(
     : 0;
   
   const video: PlatformVideoDef = {
-    id: new PlatformID(PLATFORM, videoId, pluginId, 3),
+    id: new PlatformID(platformName, videoId, pluginId, 3),
     name: title,
     thumbnails: new Thumbnails([new Thumbnail(thumbnail, 0)]),
     author,
@@ -66,10 +66,12 @@ export function channelToGrayjayChannel(
   const banner = channel.banner || channel.cover || '';
   const subscribers = channel.subscribers || channel.followerCount || 0;
   
-  const channelUrl = url || channel.url || `${BASE_URL}/channel/${channelId}`;
+  const platformName = plugin.config?.name || '{{PLATFORM_NAME}}';
+  const platformUrl = plugin.config?.platformUrl || '';
+  const channelUrl = url || channel.url || `${platformUrl}/channel/${channelId}`;
   
   return new PlatformChannel({
-    id: new PlatformID(PLATFORM, channelId, pluginId, 3),
+    id: new PlatformID(platformName, channelId, pluginId, 3),
     name: channelName,
     thumbnail,
     banner,

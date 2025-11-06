@@ -1,55 +1,78 @@
 
-
 /**
- * Extended plugin configuration type
- * Workaround until SourceConfig types are updated in @types/grayjay-source
+ * Constants for {{PLATFORM_NAME}}
+ * 
+ * Note: PluginConfig type is defined in src/utils/types.d.ts
+ * 
+ * Access via the global plugin object:
+ * - plugin.config (SourceConfig)
+ * - plugin.settings (user's selected settings)
  */
-interface PluginConfig extends SourceConfig {
-  /** Custom constants (e.g., baseUrl, apiKeys) */
-  constants?: {
-    baseUrl?: string;
-    defaultHeaders?: Record<string, string>;
-    [key: string]: any;
-  };
-  /** Repository URL */
-  repositoryUrl?: string;
-}
 
-// Constants for {{PLATFORM_NAME}}
-// NOTE: BASE_URL, PLATFORM_URL, and PLATFORM are available at runtime via config.constants
-// These are fallback values for development/typing
-
-export const BASE_URL = '{{BASE_URL}}';
-export const PLATFORM_URL = '{{PLATFORM_URL}}';
-export const PLATFORM = '{{PLATFORM_NAME}}';
-export const DEFAULT_HEADERS: Record<string, string> = {};
-
+// Error types for consistent exception handling
 export const ERROR_TYPES = {
   NETWORK: 'NetworkError',
   AUTH: 'AuthenticationError',
   NOT_FOUND: 'NotFoundError',
   INVALID_DATA: 'InvalidDataError'
-};
+} as const;
 
-// Helper to get runtime constants from config
+/**
+ * Get a plugin setting value
+ * For Dropdown settings, returns the actual selected value (not index)
+ * For Boolean settings, returns 'true' or 'false' string
+ * @param variable The setting variable name
+ * @param defaultValue Optional default value if setting doesn't exist
+ * @returns The setting value
+ */
+export function getPluginSetting(variable: string, defaultValue?: string): string {
+  // Return from runtime settings first (user's active selection)
+  if (plugin.settings[variable] !== undefined) {
+    return plugin.settings[variable];
+  }
+  
+  // Fallback to config defaults
+  const pluginConfig = plugin.config as unknown as PluginConfig;
+  const setting = pluginConfig?.settings?.find(s => s.variable === variable);
+  return setting?.default || defaultValue || '';
+}
+
+/**
+ * Get the active API base URL
+ * Uses the user's selected server from the baseUrl setting
+ * Available URLs are defined in settings[baseUrl].options
+ * @returns The active base URL
+ */
 export function getBaseUrl(): string {
-  const pluginConfig = config as unknown as PluginConfig;
-  return pluginConfig.constants?.baseUrl || BASE_URL;
+  if (!plugin.config) {
+    log('Warning: getBaseUrl() called before plugin.enable()');
+    return '';
+  }
+  
+  const pluginConfig = plugin.config as unknown as PluginConfig;
+  
+  // Get available URLs from settings (source of truth)
+  const baseUrlSetting = pluginConfig.settings?.find(s => s.variable === 'baseUrl');
+  const availableUrls = (baseUrlSetting?.options as string[]) || [];
+  
+  if (availableUrls.length === 0) {
+    log('Warning: No base URLs configured in settings');
+    return '';
+  }
+  
+  // Get user's selected URL from settings (or default)
+  const selectedUrl = getPluginSetting('baseUrl', availableUrls[0]);
+  return selectedUrl || availableUrls[0];
 }
 
-export function getPlatformUrl(): string {
-  const pluginConfig = config as unknown as PluginConfig;
-  return pluginConfig.platformUrl || PLATFORM_URL;
-}
-
-export function getPlatform(): string {
-  const pluginConfig = config as unknown as PluginConfig;
-  return pluginConfig.name || PLATFORM;
-}
-
+/**
+ * Get default HTTP headers from config.constants.defaultHeaders
+ * @returns Headers object
+ */
 export function getDefaultHeaders(): Record<string, string> {
-  const pluginConfig = config as unknown as PluginConfig;
-  return pluginConfig.constants?.defaultHeaders || DEFAULT_HEADERS;
+  if (!plugin.config) return {};
+  const pluginConfig = plugin.config as unknown as PluginConfig;
+  return pluginConfig.constants?.defaultHeaders || {};
 }
 
 // Add your custom constants here

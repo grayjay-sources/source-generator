@@ -104,7 +104,12 @@ async function main() {
     try {
       new URL(config.platformUrl);
       new URL(config.repositoryUrl);
-      new URL(config.baseUrl);
+      
+      // Validate base URL(s) - can be comma-separated
+      const baseUrls = config.baseUrl.split(',').map(u => u.trim()).filter(u => u);
+      for (const url of baseUrls) {
+        new URL(url);
+      }
     } catch (error) {
       console.error(chalk.red('\n❌ Invalid URL provided. Please check your URLs.\n'));
       process.exit(1);

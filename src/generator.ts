@@ -398,8 +398,10 @@ export class SourceGenerator {
 
   private async generateTypesFile(): Promise<void> {
     const srcDir = path.join(this.options.outputDir, 'src');
+    const utilsDir = path.join(srcDir, 'utils');
     const { config } = this.options;
     
+    // Generate custom platform types (src/types.ts)
     const types = await this.getFormattedTemplate('snippets/types-template.ts', {
       PLATFORM_NAME: config.name
     });
@@ -407,6 +409,17 @@ export class SourceGenerator {
     await fs.writeFile(
       path.join(srcDir, 'types.ts'),
       types
+    );
+
+    // Generate PluginConfig type definitions (src/utils/types.d.ts)
+    // Copy from generator's own source types
+    await fs.mkdir(utilsDir, { recursive: true });
+    const sourceConfigPath = path.join(__dirname, 'types', 'sourceconfig.d.ts');
+    const pluginConfigTypes = await fs.readFile(sourceConfigPath, 'utf-8');
+    
+    await fs.writeFile(
+      path.join(utilsDir, 'types.d.ts'),
+      pluginConfigTypes
     );
   }
 
@@ -572,7 +585,7 @@ export class SourceGenerator {
     
     const networkReplacements = {
       ...commonReplacements,
-      NETWORK_IMPORTS: `import { getDefaultHeaders } from '../constants';`,
+      NETWORK_IMPORTS: '',
       HTML_PARSE_IMPLEMENTATION: capabilities.useHTML
         ? `return domParser.parseFromString(response.body, 'text/html');`
         : `log('Warning: fetchHtml was called but --uses-html was not specified during generation. Returning raw HTML string.');\n        return response.body;`,
@@ -689,7 +702,7 @@ export class SourceGenerator {
       imports += `import * as Pagers from './pagers';\n`;
     }
     if (capabilities.hasAuth) {
-      imports += `import { StateManager } from './state';\n`;
+      imports += `import { isTokenValid, refreshAuthToken, clearAuthState } from './state';\n`;
     }
 
     // Load method implementations
@@ -706,14 +719,9 @@ export class SourceGenerator {
       ? await this.getSnippet('auth-methods', commonReplacements) 
       : '';
 
-    // Build state properties
+    // Build state properties (added to plugin.state object)
     const stateProperties = capabilities.hasAuth 
-      ? `authenticated: false,\n  authToken: ''`
-      : '';
-    
-    // Build load state logic
-    const loadState = capabilities.hasAuth
-      ? `const savedState = JSON.parse(conf.state || '{}');\n  Object.assign(state, savedState);`
+      ? `authenticated: false,\n    authToken: '',\n    authTokenExpiration: 0,\n    userId: ''`
       : '';
 
     // Assemble the main script
@@ -721,7 +729,6 @@ export class SourceGenerator {
       ...commonReplacements,
       IMPORTS: imports,
       STATE_PROPERTIES: stateProperties,
-      LOAD_STATE: loadState,
       SEARCH_METHODS: searchMethods,
       PLAYLIST_METHODS: playlistMethods,
       COMMENT_METHODS: commentMethods,

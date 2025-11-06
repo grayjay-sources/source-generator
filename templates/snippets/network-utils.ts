@@ -50,8 +50,8 @@ function _fetch(url: string, options: FetchOptions = {}): any {
     throwOnError = true
   } = options;
 
-  // Merge with default headers
-  const defaultHeaders = getDefaultHeaders();
+  // Merge with default headers from plugin config
+  const defaultHeaders = plugin.config?.constants?.defaultHeaders || {};
   const headers = { ...defaultHeaders, ...customHeaders };
 
   let lastError: Error | null = null;

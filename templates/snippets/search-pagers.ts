@@ -1,6 +1,6 @@
 
 
-class SearchPager extends VideoPager {
+export class SearchPager extends VideoPager {
   private query: string;
   private type: string;
   private page: number = 0;
@@ -26,7 +26,7 @@ class SearchPager extends VideoPager {
   }
 }
 
-class ChannelSearchPager extends ChannelPager {
+export class ChannelSearchPager extends ChannelPager {
   private query: string;
   private page: number = 0;
   private hasMorePages: boolean = true;
@@ -49,4 +49,3 @@ class ChannelSearchPager extends ChannelPager {
     return [];
   }
 }
-

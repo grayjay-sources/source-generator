@@ -8,7 +8,7 @@
     "gjsg": "dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').cpSync('src/types', 'dist/types', {recursive: true})\"",
     "dev": "tsc --watch",
     "prepare": "npm run build",
     "test": "node dist/cli.js --help"
