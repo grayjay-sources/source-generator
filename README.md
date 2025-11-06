@@ -40,25 +40,29 @@ npm run submit         # Submit to grayjay-sources.github.io
 ```
 my-platform/
 ├── src/
-│   ├── script.ts      # Main plugin
-│   ├── types.ts       # Custom types
-│   ├── constants.ts   # Platform constants
-│   ├── utils.ts       # Helper functions
-│   └── api/           # API client (if --uses-api)
+│   ├── script.ts         # Main plugin
+│   ├── types.ts          # Custom platform types
+│   ├── constants.ts      # Platform constants
+│   ├── utils.ts          # Helper functions
+│   ├── api.ts            # API client wrapper
+│   └── utils/
+│       ├── network.ts    # Unified network utilities
+│       └── graphql.ts    # GraphQL utilities (if --uses-graphql)
 ├── test/
-│   └── script.test.ts # Unit tests
-├── scripts/           # Sign, publish, test scripts
-├── dist/              # Build output
-└── config.json        # Plugin configuration
+│   └── script.test.ts    # Unit tests
+├── scripts/              # Build, sign, publish, test scripts
+├── dist/                 # Build output (config.json, script.js)
+└── config.json           # Plugin configuration
 ```
 
 ## Features
 
+- **Unified Network System**: `fetch()`, `fetchJson()`, `fetchHtml()`, `fetchGraphQL()` with automatic retries
 - **Node.js Test Runner**: Unit tests with `@kaidelorenzo/grayjay-polyfill`
 - **Dev Portal Integration**: Test on Android via `@grayjay-sources/dev-portal-client`
 - **Auto Signing**: RSA-2048 + SHA512 (requires OpenSSL)
 - **Type Definitions**: Uses `@types/grayjay-source` from npm
-- **Modular Structure**: API client, mappers, pagers, state management
+- **Modular Structure**: Network utilities, API client, mappers, pagers, state management
 - **Auto QR Code**: For easy plugin installation
 
 ## Requirements

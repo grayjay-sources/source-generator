@@ -7,6 +7,7 @@
 export const BASE_URL = '{{BASE_URL}}';
 export const PLATFORM_URL = '{{PLATFORM_URL}}';
 export const PLATFORM = '{{PLATFORM_NAME}}';
+export const DEFAULT_HEADERS: Record<string, string> = {};
 
 export const ERROR_TYPES = {
   NETWORK: 'NetworkError',
@@ -28,6 +29,10 @@ export function getPlatformUrl(): string {
 export function getPlatform(): string {
   // Platform name is in root config
   return (config as any).name || PLATFORM;
+}
+
+export function getDefaultHeaders(): Record<string, string> {
+  return (config as any).constants?.defaultHeaders || DEFAULT_HEADERS;
 }
 
 // Add your custom constants here

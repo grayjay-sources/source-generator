@@ -566,31 +566,41 @@ export class SourceGenerator {
         : '',
     };
 
-    // Generate GraphQL module
+    // Generate unified network utilities (always generated)
+    const utilsDir = path.join(srcDir, 'utils');
+    await fs.mkdir(utilsDir, { recursive: true });
+    
+    const networkReplacements = {
+      ...commonReplacements,
+      NETWORK_IMPORTS: `import { getDefaultHeaders } from '../constants';`,
+      HTML_PARSE_IMPLEMENTATION: capabilities.useHTML
+        ? `return domParser.parseFromString(response.body, 'text/html');`
+        : `log('Warning: fetchHtml was called but --uses-html was not specified during generation. Returning raw HTML string.');\n        return response.body;`,
+      HTML_PARSE_CHECK: capabilities.useHTML
+        ? ''
+        : `log('Warning: Calling fetchHtml without --uses-html flag. Returning raw HTML string.');`,
+      HTML_USAGE_WARNING: capabilities.useHTML
+        ? ''
+        : 'Warning: Requires --uses-html flag during generation',
+    };
+    
+    const networkContent = await this.getSnippet('network-utils', networkReplacements);
+    await fs.writeFile(path.join(utilsDir, 'network.ts'), networkContent);
+
+    // Generate API client wrapper (always generated for consistency)
+    const apiReplacements = {
+      ...commonReplacements,
+    };
+    const apiContent = await this.getSnippet('api-client', apiReplacements);
+    await fs.writeFile(path.join(srcDir, 'api.ts'), apiContent);
+
+    // Generate GraphQL module (persisted queries for advanced use)
     if (capabilities.useGraphQL) {
       const graphqlDir = path.join(srcDir, 'graphql');
       await fs.mkdir(graphqlDir, { recursive: true });
       
       const queriesContent = await this.getSnippet('persisted-graphql-helper', commonReplacements);
       await fs.writeFile(path.join(graphqlDir, 'queries.ts'), queriesContent);
-    }
-
-    // Generate API module
-    if (capabilities.useAPI) {
-      const apiDir = path.join(srcDir, 'api');
-      await fs.mkdir(apiDir, { recursive: true });
-      
-      const clientContent = await this.getSnippet('api-helper', commonReplacements);
-      await fs.writeFile(path.join(apiDir, 'client.ts'), clientContent);
-    }
-
-    // Generate HTML parsing module
-    if (capabilities.useHTML) {
-      const htmlDir = path.join(srcDir, 'html');
-      await fs.mkdir(htmlDir, { recursive: true });
-      
-      const helperContent = await this.getSnippet('html-helper', commonReplacements);
-      await fs.writeFile(path.join(htmlDir, 'parser.ts'), helperContent);
     }
 
     // Generate Algolia search module
@@ -657,14 +667,13 @@ export class SourceGenerator {
 
     // Build imports section
     let imports = '';
+    
+    // Always import network utilities and API client
+    imports += `import * as network from './utils/network';\n`;
+    imports += `import { api } from './api';\n`;
+    
     if (capabilities.useGraphQL) {
       imports += `import { executeGqlQuery } from './graphql/queries';\n`;
-    }
-    if (capabilities.useAPI) {
-      imports += `import { apiClient } from './api/client';\n`;
-    }
-    if (capabilities.useHTML) {
-      imports += `import { parseHtml } from './html/parser';\n`;
     }
     if (capabilities.hasPlaylists || capabilities.hasLiveStreams) {
       imports += `import * as Mappers from './mappers';\n`;
@@ -745,15 +754,11 @@ export class SourceGenerator {
       ? await this.getSnippet('auth-methods', commonReplacements) 
       : '';
     
-    const graphqlHelper = capabilities.useGraphQL 
-      ? await this.getSnippet('graphql-helper', commonReplacements) 
-      : '';
-    const apiHelper = capabilities.useAPI 
-      ? await this.getSnippet('api-helper', commonReplacements) 
-      : '';
-    const htmlHelper = capabilities.useHTML 
-      ? await this.getSnippet('html-helper', commonReplacements) 
-      : '';
+    // Note: Network utilities are now handled by the unified network system
+    // These old helpers are deprecated in favor of src/utils/network.ts
+    const graphqlHelper = '';
+    const apiHelper = '';
+    const htmlHelper = '';
     
     const searchPagers = capabilities.hasSearch 
       ? await this.getSnippet('search-pagers', commonReplacements) 
