@@ -308,6 +308,7 @@ export class SourceGenerator {
     const readme = await this.getFormattedTemplate('snippets/readme-template.md', {
       PLATFORM_NAME: config.name,
       DESCRIPTION: config.description,
+      ICON_URL: config.logoUrl || '',
       GITHUB_USER: githubUser,
       REPO_NAME: repoName,
       REPOSITORY_URL: config.repositoryUrl,

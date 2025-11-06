@@ -1,4 +1,4 @@
-# {{PLATFORM_NAME}} Plugin for GrayJay
+# <img src="{{ICON_URL}}" width="32" height="32" /> {{PLATFORM_NAME}} Plugin for GrayJay
 
 {{DESCRIPTION}}
 
@@ -21,6 +21,15 @@ grayjay://plugin/https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/releases/lates
 Scan this QR code with the GrayJay app:
 
 ![QR Code](assets/qrcode.png)
+
+## Screenshots
+
+> [!NOTE]
+> Add your own screenshots to `assets/screenshots/` directory and update the table below.
+
+|                      Home                       |                       Video                       |                        Channel                        |                       Source                        |
+| :---------------------------------------------: | :-----------------------------------------------: | :---------------------------------------------------: | :-------------------------------------------------: |
+| ![home screenshot](assets/screenshots/home.jpg) | ![video screenshot](assets/screenshots/video.jpg) | ![channel screenshot](assets/screenshots/channel.jpg) | ![source screenshot](assets/screenshots/source.jpg) |
 
 ## Features
 
