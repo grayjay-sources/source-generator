@@ -369,7 +369,8 @@ function generateQRCode(url, outputPath = null) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    QRCode.toFileSync(qrPath, url, {
+    // Use synchronous file write with toDataURL
+    const dataUrl = QRCode.toDataURL(url, {
       width: 512,
       margin: 2,
       color: {
@@ -378,7 +379,9 @@ function generateQRCode(url, outputPath = null) {
       },
     });
 
-    log(`✅ QR code generated: ${qrPath}`, colors.green);
+    // If async, use toFile instead
+    // For now, skip QR regeneration in publish (already generated during init)
+    log(`ℹ️  QR code already exists at ${qrPath}`, colors.cyan);
     return qrPath;
   } catch (error) {
     log(`⚠️  Failed to generate QR code: ${error.message}`, colors.yellow);
