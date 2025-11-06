@@ -587,6 +587,12 @@ export class SourceGenerator {
     const networkContent = await this.getSnippet('network-utils', networkReplacements);
     await fs.writeFile(path.join(utilsDir, 'network.ts'), networkContent);
 
+    // Generate GraphQL utilities (only if --uses-graphql is specified)
+    if (capabilities.useGraphQL) {
+      const graphqlContent = await this.getSnippet('graphql-utils', commonReplacements);
+      await fs.writeFile(path.join(utilsDir, 'graphql.ts'), graphqlContent);
+    }
+
     // Generate API client wrapper (always generated for consistency)
     const apiReplacements = {
       ...commonReplacements,
@@ -594,21 +600,22 @@ export class SourceGenerator {
     const apiContent = await this.getSnippet('api-client', apiReplacements);
     await fs.writeFile(path.join(srcDir, 'api.ts'), apiContent);
 
-    // Generate GraphQL module (persisted queries for advanced use)
-    if (capabilities.useGraphQL) {
-      const graphqlDir = path.join(srcDir, 'graphql');
-      await fs.mkdir(graphqlDir, { recursive: true });
-      
-      const queriesContent = await this.getSnippet('persisted-graphql-helper', commonReplacements);
-      await fs.writeFile(path.join(graphqlDir, 'queries.ts'), queriesContent);
-    }
-
     // Generate Algolia search module
     if (capabilities.useAlgolia) {
       const algoliaDir = path.join(srcDir, 'search');
       await fs.mkdir(algoliaDir, { recursive: true });
       
-      const algoliaContent = await this.getSnippet('algolia-search-helper', commonReplacements);
+      const algoliaReplacements = {
+        ...commonReplacements,
+        ALGOLIA_GRAPHQL_IMPORT: capabilities.useGraphQL 
+          ? `import * as graphql from '../utils/graphql';`
+          : '',
+        ALGOLIA_KEY_FETCH: capabilities.useGraphQL
+          ? `const [error, data] = graphql.executePersistedQuery({\n      operationName: 'AlgoliaApiKey',\n      sha256Hash: 'YOUR_HASH_HERE',\n      variables: {}\n    });\n    \n    if (error) {\n      throw new ScriptException('Failed to get Algolia API key: ' + error.message);\n    }`
+          : `// Fetch Algolia API key from your platform's API\n    // Example: const data = api.getJson('/algolia/credentials');\n    const data = null; // TODO: Implement API key fetching`
+      };
+      
+      const algoliaContent = await this.getSnippet('algolia-search-helper', algoliaReplacements);
       await fs.writeFile(path.join(algoliaDir, 'algolia.ts'), algoliaContent);
     }
 
@@ -673,7 +680,7 @@ export class SourceGenerator {
     imports += `import { api } from './api';\n`;
     
     if (capabilities.useGraphQL) {
-      imports += `import { executeGqlQuery } from './graphql/queries';\n`;
+      imports += `import * as graphql from './utils/graphql';\n`;
     }
     if (capabilities.hasPlaylists || capabilities.hasLiveStreams) {
       imports += `import * as Mappers from './mappers';\n`;

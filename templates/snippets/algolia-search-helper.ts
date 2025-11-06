@@ -2,6 +2,9 @@
 
 // Helper for Algolia-powered search (used by platforms like Joyn, Twitch, etc.)
 
+import * as network from '../utils/network';
+{{ALGOLIA_GRAPHQL_IMPORT}}
+
 // TODO: Add these to your constants.ts file:
 // export const ALGOLIA_APP_ID = 'YOUR_APP_ID';
 // export const BASE_URL_ALGOLIA = 'https://YOUR_APP_ID-dsn.algolia.net/1/indexes/*/queries';
@@ -14,18 +17,7 @@ function refreshAlgoliaApiKey(): void {
   try {
     // Example: Query platform's API for Algolia credentials
     // Adjust this based on your platform's API
-    const [error, data] = executeGqlQuery({
-      operationName: 'AlgoliaApiKey',
-      persistedQuery: {
-        version: 1,
-        sha256Hash: 'YOUR_HASH_HERE'
-      },
-      variables: {}
-    });
-    
-    if (error) {
-      throw new ScriptException('Failed to get Algolia API key: ' + error.status);
-    }
+    {{ALGOLIA_KEY_FETCH}}
     
     if (data && data.algoliaApiKey) {
       state.algoliaApiKey = data.algoliaApiKey.key || '';
@@ -79,23 +71,20 @@ function searchWithAlgolia(
   
   const headers = {
     'x-algolia-application-id': ALGOLIA_APP_ID,
-    'x-algolia-api-key': state.algoliaApiKey,
-    'Content-Type': 'application/json'
+    'x-algolia-api-key': state.algoliaApiKey
   };
   
   try {
-    const resp = http.POST(
+    const data = network.postJson(
       BASE_URL_ALGOLIA,
-      JSON.stringify(algoliaRequest),
-      headers,
-      false
+      algoliaRequest,
+      { headers, retries: 2, throwOnError: false }
     );
     
-    if (!resp.isOk) {
-      return [{ code: resp.code, message: `Search failed: ${resp.code}` }, null];
+    if (!data) {
+      return [{ code: 'NO_RESPONSE', message: 'Search failed: No response' }, null];
     }
     
-    const data = JSON.parse(resp.body);
     const hits = data.results?.[0]?.hits || [];
     const nbPages = data.results?.[0]?.nbPages || 0;
     const totalHits = data.results?.[0]?.nbHits || 0;

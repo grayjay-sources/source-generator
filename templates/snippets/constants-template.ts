@@ -1,5 +1,20 @@
 
 
+/**
+ * Extended plugin configuration type
+ * Workaround until SourceConfig types are updated in @types/grayjay-source
+ */
+interface PluginConfig extends SourceConfig {
+  /** Custom constants (e.g., baseUrl, apiKeys) */
+  constants?: {
+    baseUrl?: string;
+    defaultHeaders?: Record<string, string>;
+    [key: string]: any;
+  };
+  /** Repository URL */
+  repositoryUrl?: string;
+}
+
 // Constants for {{PLATFORM_NAME}}
 // NOTE: BASE_URL, PLATFORM_URL, and PLATFORM are available at runtime via config.constants
 // These are fallback values for development/typing
@@ -18,21 +33,23 @@ export const ERROR_TYPES = {
 
 // Helper to get runtime constants from config
 export function getBaseUrl(): string {
-  return (config as any).constants?.baseUrl || BASE_URL;
+  const pluginConfig = config as unknown as PluginConfig;
+  return pluginConfig.constants?.baseUrl || BASE_URL;
 }
 
 export function getPlatformUrl(): string {
-  // platformUrl is in root config, no need for constants
-  return (config as any).platformUrl || PLATFORM_URL;
+  const pluginConfig = config as unknown as PluginConfig;
+  return pluginConfig.platformUrl || PLATFORM_URL;
 }
 
 export function getPlatform(): string {
-  // Platform name is in root config
-  return (config as any).name || PLATFORM;
+  const pluginConfig = config as unknown as PluginConfig;
+  return pluginConfig.name || PLATFORM;
 }
 
 export function getDefaultHeaders(): Record<string, string> {
-  return (config as any).constants?.defaultHeaders || DEFAULT_HEADERS;
+  const pluginConfig = config as unknown as PluginConfig;
+  return pluginConfig.constants?.defaultHeaders || DEFAULT_HEADERS;
 }
 
 // Add your custom constants here
